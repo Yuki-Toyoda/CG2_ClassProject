@@ -1,0 +1,36 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.6.33801.468
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CG2_ClassProject", "CG2_ClassProject.vcxproj", "{D746D289-F8BA-414C-8922-3F98844F880C}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ソリューション項目", "ソリューション項目", "{8A8745D5-0652-4013-8759-E5532EF3E3AD}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D746D289-F8BA-414C-8922-3F98844F880C}.Debug|x64.ActiveCfg = Debug|x64
+		{D746D289-F8BA-414C-8922-3F98844F880C}.Debug|x64.Build.0 = Debug|x64
+		{D746D289-F8BA-414C-8922-3F98844F880C}.Debug|x86.ActiveCfg = Debug|Win32
+		{D746D289-F8BA-414C-8922-3F98844F880C}.Debug|x86.Build.0 = Debug|Win32
+		{D746D289-F8BA-414C-8922-3F98844F880C}.Release|x64.ActiveCfg = Release|x64
+		{D746D289-F8BA-414C-8922-3F98844F880C}.Release|x64.Build.0 = Release|x64
+		{D746D289-F8BA-414C-8922-3F98844F880C}.Release|x86.ActiveCfg = Release|Win32
+		{D746D289-F8BA-414C-8922-3F98844F880C}.Release|x86.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {35ED75BD-D826-474A-BAA0-2C4FC193DDDA}
+	EndGlobalSection
+EndGlobal
