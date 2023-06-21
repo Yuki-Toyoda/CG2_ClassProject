@@ -9,6 +9,7 @@
 #include <dxgi1_6.h>
 
 #include "WinApp.h"
+#include "Debug.h"
 
 /// <summary>
 /// DirectX汎用クラス
@@ -39,11 +40,10 @@ private: // メンバ変数
 	WinApp* winApp_;
 
 	// Direct3D関連
-	Microsoft::WRL::ComPtr<IDXGIFactory7> dxgiFactory_;
-	Microsoft::WRL::ComPtr<ID3D12Device> device_;
-
-	int32_t backBufferWidth_ = 0;
-	int32_t backBufferHeight_ = 0;
+	Microsoft::WRL::ComPtr<IDXGIFactory7> dxgiFactory_; // DXGIファクトリー
+	Microsoft::WRL::ComPtr<ID3D12Device> device_;       // デバイス
+	int32_t backBufferWidth_ = 0;						// ウィンドウ横幅
+	int32_t backBufferHeight_ = 0;						// ウィンドウ縦幅
 
 private: // メンバ関数
 

@@ -74,6 +74,9 @@ void DirectXCommon::InitializeDXGIDevice() {
 
 		// 取得したアダプタがソフトウェアアダプタでなければ採用する
 		if (!(adapterDesc.Flags & DXGI_ADAPTER_FLAG3_SOFTWARE)) {
+			
+			// 採用したアダプターの情報をログに入れて出力する
+			Debug::Log(Debug::ConvertString(std::format(L"use Adapter:{}\n", adapterDesc.Description)));
 			// 処理を抜ける
 			break;
 		}
@@ -91,6 +94,8 @@ void DirectXCommon::InitializeDXGIDevice() {
 		D3D_FEATURE_LEVEL_12_1,
 		D3D_FEATURE_LEVEL_12_0
 	};
+	// ログ出力用文字列
+	const char* featureLevelStriings[] = { "12.2", "12.1",  "12.0" };
 
 	// 取得したアダプターを用いて、高い順にデバイスを生成できるか試す
 	for (size_t i = 0; i < _countof(featureLevels); ++i) {
@@ -98,6 +103,9 @@ void DirectXCommon::InitializeDXGIDevice() {
 		result = D3D12CreateDevice(useAdapter.Get(), featureLevels[i], IID_PPV_ARGS(&device_));
 		// 指定した機能レベルでデバイスが生成出来ているかを確認する
 		if (SUCCEEDED(result)) {
+
+			// ログを出力
+			Debug::Log(std::format("FeatureLevel : {}\n", featureLevelStriings[i]));
 			// 生成できていればループ処理を抜ける
 			break;
 		}
@@ -105,5 +113,7 @@ void DirectXCommon::InitializeDXGIDevice() {
 
 	// デバイスを生成出来なかった場合は起動しない
 	assert(device_ != nullptr);
+	// 初期化完了のログを出す
+	Debug::Log("Complete Create D3D12Device!!!\n");
 
 }

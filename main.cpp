@@ -27,6 +27,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			// ゲーム終了
 			break;
 		}
+		else {
+
+			// ゲーム固有の処理
+
+		}
 
 	}
 
