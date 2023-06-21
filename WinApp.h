@@ -66,7 +66,7 @@ public: // メンバ関数
 
 private: // メンバ関数
 
-	// シングルトンインスタンスの設定
+	// シングルトンパターンの設定
 	WinApp() = default;
 	~WinApp() = default;
 	WinApp(const WinApp&) = delete;
