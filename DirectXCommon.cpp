@@ -182,12 +182,14 @@ void DirectXCommon::InitializeDXGIDevice() {
 
 #ifdef _DEBUG
 
-	//ID3D12Debug1* debugController = nullptr;
-	//if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&debugController)))) {
-	//	// デバックレイヤーを有効にする
-	//	
+	ID3D12Debug1* debugController = nullptr;
+	if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&debugController)))) {
+		// デバックレイヤーを有効にする
+		debugController->EnableDebugLayer();
+		// さらにGPU側でもチェックを行うようにする
+		debugController->SetEnableGPUBasedValidation(TRUE);
 
-	//}
+	}
 
 #endif // _DEBUG
 
@@ -250,6 +252,40 @@ void DirectXCommon::InitializeDXGIDevice() {
 	assert(device_ != nullptr);
 	// 初期化完了のログを出す
 	Debug::Log("Complete Create D3D12Device!!!\n");
+
+#ifndef _DEBUG
+
+	//// デバックでの実行時、エラーが出た場合警告を出す
+	//Microsoft::WRL::ComPtr<ID3D12InfoQueue> infoQueue;
+
+	//if (SUCCEEDED(device_->QueryInterface(IID_PPV_ARGS(&infoQueue)))) {
+
+	//	// 抑制するエラーID
+	//	D3D12_MESSAGE_ID denyIds[] = {
+	//		D3D12_MESSAGE_ID_RESOURCE_BARRIER_MISMATCHING_COMMAND_LIST_TYPE
+	//	};
+
+	//	// 抑制する表示レベル
+	//	D3D12_MESSAGE_SEVERITY severities[] = { D3D12_MESSAGE_SEVERITY_INFO };
+	//	D3D12_INFO_QUEUE_FILTER filter{};
+	//	filter.DenyList.NumIDs = _countof(denyIds);
+	//	filter.DenyList.pIDList = denyIds;
+	//	filter.DenyList.NumSeverities = _countof(severities);
+	//	filter.DenyList.pSeverityList = severities;
+
+	//	// 指定したエラーの表示を抑制する
+	//	infoQueue->PushStorageFilter(&filter);
+
+	//	// 重大なエラー時に停止する
+	//	infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_CORRUPTION, true);
+	//	// エラー時に停止する
+	//	infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_ERROR, true);
+	//	// 警告時に停止する
+	//	infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_WARNING, true);
+	//}
+
+#endif // !_DEBUG
+
 
 }
 
