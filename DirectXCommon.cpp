@@ -35,6 +35,140 @@ void DirectXCommon::Initialize(WinApp* win,
 
 	// DXGIデバイスの初期化
 	InitializeDXGIDevice();
+	// コマンド関連初期化
+	InitializeCommand();
+	// スワップチューン生成
+	CreateSwapChain();
+	// レンダーターゲット生成
+	CreateFinalRenderTargets();
+
+}
+
+/// <summary>
+/// 描画前処理
+/// </summary>
+void DirectXCommon::PreDraw() {
+
+	// バックバッファの番号を取得する
+	// 二つの画面を用意してるので0~1。
+	UINT bbIndex = swapChain_->GetCurrentBackBufferIndex();
+
+	// リソースバリアを変更する
+	D3D12_RESOURCE_BARRIER barrier = SwitchResourceBarrier(
+		backBuffers_[bbIndex].Get(), D3D12_RESOURCE_STATE_PRESENT,
+		D3D12_RESOURCE_STATE_RENDER_TARGET
+	);
+
+	// レンダーターゲットビュー用ディスクリプタヒープのハンドルを取得
+	D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = GetCPUDescriptorHandle(
+		rtvHeap_.Get(), device_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV), bbIndex);
+
+	// 画面をクリアする
+	ClearRenderTarget();
+
+}
+
+/// <summary>
+/// 描画終了後の処理
+/// </summary>
+void DirectXCommon::PostDraw() {
+
+	// 結果確認用
+	HRESULT result = S_FALSE;
+
+	// リソースバリアを変更
+	UINT bbIndex = swapChain_->GetCurrentBackBufferIndex();
+	D3D12_RESOURCE_BARRIER barrier = SwitchResourceBarrier(
+		backBuffers_[bbIndex].Get(), D3D12_RESOURCE_STATE_RENDER_TARGET,
+		D3D12_RESOURCE_STATE_PRESENT
+	);
+
+	// コマンドリストの命令をクローズする
+	commandList_->Close();
+
+	// GPUにコマンドリストの命令を実行するよう指示する
+	ID3D12CommandList* commandLists[] = { commandList_.Get()};
+	commandQueue_->ExecuteCommandLists(1, commandLists);
+
+	// GPUとOSに画面の交換を行うように指示する
+	swapChain_->Present(1, 0);
+
+	// 次フレーム用にコマンドアロケーターをリセット
+	result = commandAllocator_->Reset();
+	// コマンドアロケーターが準備できたかを確認する
+	assert(SUCCEEDED(result));
+	// 次フレームようにコマンドリストをリセット
+	result = commandList_->Reset(commandAllocator_.Get(), nullptr);
+	// コマンドリストをリセットできたか確認する
+	assert(SUCCEEDED(result));
+
+}
+
+/// <summary>
+/// レンダーターゲットのクリア
+/// </summary>
+void DirectXCommon::ClearRenderTarget() {
+
+	// バックバッファのインデックスを取得する
+	UINT bbIndex = swapChain_->GetCurrentBackBufferIndex();
+
+	// レンダーターゲットビューに用いるディスクリプタヒープのハンドルを取得
+	D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = GetCPUDescriptorHandle(
+	rtvHeap_.Get(), device_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV), bbIndex);
+
+	// 全画面クリア
+	float clearColor[] = { 0.1f, 0.25f, 0.5f, 0.0f };
+	commandList_->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
+
+}
+
+/// <summary>
+/// 特定のインデックスのディスクリプタハンドルを取得する関数(CPU)
+/// </summary>
+/// <param name="descriptorHeap">ディスクリプタヒープ</param>
+/// <param name="descriptorSize">ディスクリプタサイズ</param>
+/// <param name="index">取得するヒープのインデックス</param>
+/// <returns>特定のインデックスのディスクリプタハンドル</returns>
+D3D12_CPU_DESCRIPTOR_HANDLE DirectXCommon::GetCPUDescriptorHandle(ID3D12DescriptorHeap* descriptorHeap, uint32_t descriptorSize, uint32_t index) {
+	D3D12_CPU_DESCRIPTOR_HANDLE handleCPU = descriptorHeap->GetCPUDescriptorHandleForHeapStart();
+	handleCPU.ptr += (descriptorSize * index);
+	return handleCPU;
+}
+
+/// <summary>
+/// 特定のインデックスのディスクリプタハンドルを取得する関数(GPU)
+/// </summary>
+/// <param name="descriptorHeap">ディスクリプタヒープ</param>
+/// <param name="descriptorSize">ディスクリプタサイズ</param>
+/// <param name="index">取得するヒープのインデックス</param>
+/// <returns>特定のインデックスのディスクリプタハンドル</returns>
+D3D12_GPU_DESCRIPTOR_HANDLE DirectXCommon::GetGPUDescriptorHandle(ID3D12DescriptorHeap* descriptorHeap, uint32_t descriptorSize, uint32_t index) {
+	D3D12_GPU_DESCRIPTOR_HANDLE handleGPU = descriptorHeap->GetGPUDescriptorHandleForHeapStart();
+	handleGPU.ptr += (descriptorSize * index);
+	return handleGPU;
+}
+
+/// <summary>
+/// リソースバリアの切り替えを行う関数
+/// </summary>
+/// <param name="resource">リソース</param>
+/// <param name="before">以前のステート</param>
+/// <param name="after">以降のステート</param>
+/// <returns>切り替えたリソースバリア</returns>
+D3D12_RESOURCE_BARRIER DirectXCommon::SwitchResourceBarrier(ID3D12Resource* resource, D3D12_RESOURCE_STATES before, D3D12_RESOURCE_STATES after) {
+
+	// 返り値用のリソースバリアを用意
+	D3D12_RESOURCE_BARRIER barrier{};
+	
+	// 引数を元にバリアの設定を行う
+	barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+	barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+	barrier.Transition.pResource = resource;
+	barrier.Transition.StateBefore = before;
+	barrier.Transition.StateAfter = after;
+
+	// 設定を行ったバリアを返す
+	return barrier;
 
 }
 
@@ -46,14 +180,16 @@ void DirectXCommon::InitializeDXGIDevice() {
 	// 結果確認用
 	HRESULT result = S_FALSE;
 
-//#ifdef _DEBUG
-//
-//	ID3D12Debug1* debugController = nullptr;
-//	if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&debugController)))) {
-//		// デバックレイヤーを有効にする
-//	}
-//
-//#endif // _DEBUG
+#ifdef _DEBUG
+
+	//ID3D12Debug1* debugController = nullptr;
+	//if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&debugController)))) {
+	//	// デバックレイヤーを有効にする
+	//	
+
+	//}
+
+#endif // _DEBUG
 
 	// DXGIFactoryが生成できるかどうかを確認する
 	result = CreateDXGIFactory(IID_PPV_ARGS(&dxgiFactory_));
@@ -103,7 +239,6 @@ void DirectXCommon::InitializeDXGIDevice() {
 		result = D3D12CreateDevice(useAdapter.Get(), featureLevels[i], IID_PPV_ARGS(&device_));
 		// 指定した機能レベルでデバイスが生成出来ているかを確認する
 		if (SUCCEEDED(result)) {
-
 			// ログを出力
 			Debug::Log(std::format("FeatureLevel : {}\n", featureLevelStriings[i]));
 			// 生成できていればループ処理を抜ける
@@ -115,5 +250,121 @@ void DirectXCommon::InitializeDXGIDevice() {
 	assert(device_ != nullptr);
 	// 初期化完了のログを出す
 	Debug::Log("Complete Create D3D12Device!!!\n");
+
+}
+
+/// <summary>
+/// スワップチューン作成関数
+/// </summary>
+void DirectXCommon::CreateSwapChain() {
+
+	// 結果確認用
+	HRESULT result = S_FALSE;
+
+	// スワップチューンの生成を行う
+	DXGI_SWAP_CHAIN_DESC1 swapChainDesc{};
+	// スワップチューンの設定を行う
+	swapChainDesc.Width = backBufferWidth_;						 // ウィンドウ横幅
+	swapChainDesc.Height = backBufferHeight_;					 // ウィンドウ縦幅
+	swapChainDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;			 // 色情報の書式
+	swapChainDesc.SampleDesc.Count = 1;							 // マルチサンプルを行わない
+	swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT; // 描画のターゲットとして利用する
+	swapChainDesc.BufferCount = 2;								 // バッファ数を二つに設定
+	swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;    // モニターの描画し次第破棄する
+
+	// 変換のため、コームポインタで空のSwapChain1を生成する
+	Microsoft::WRL::ComPtr<IDXGISwapChain1> swapChain1;
+
+	// コマンドキュー、ウィンドウハンドル、スワップチューンの設定を渡して生成する
+	result = dxgiFactory_->CreateSwapChainForHwnd(
+		commandQueue_.Get(),
+		winApp_->GetHwnd(),
+		&swapChainDesc,
+		nullptr, nullptr,
+		&swapChain1
+	);
+	// スワップチューンを生成出来ているかを確認する
+	assert(SUCCEEDED(result));
+
+	// SwapChain1 を SwapChain4 に型変換して渡す
+	result = swapChain1->QueryInterface(IID_PPV_ARGS(&swapChain_));
+	// 渡せているかどうか確認する
+	assert(SUCCEEDED(result));
+
+}
+
+/// <summary>
+/// コマンド関連初期化関数
+/// </summary>
+void DirectXCommon::InitializeCommand() {
+
+	// 結果確認用
+	HRESULT result = S_FALSE;
+
+	// コマンドキューの生成を行う
+	D3D12_COMMAND_QUEUE_DESC commandQueueDesc{};
+	result = device_->CreateCommandQueue(&commandQueueDesc,
+		IID_PPV_ARGS(&commandQueue_));
+	// 生成出来ているかを確認する
+	assert(SUCCEEDED(result));
+
+	// コマンドアロケーターの生成を行う
+	result = device_->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&commandAllocator_));
+	// 生成出来ているか確認する
+	assert(SUCCEEDED(result));
+
+	// コマンドリストの生成を行う
+	result = device_->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, commandAllocator_.Get(), nullptr,
+		IID_PPV_ARGS(&commandList_));
+	// 生成出来ているか確認する
+	assert(SUCCEEDED(result));
+	
+
+}
+
+/// <summary>
+/// レンダーターゲット生成
+/// </summary>
+void DirectXCommon::CreateFinalRenderTargets() {
+
+	// 結果確認用
+	HRESULT result = S_FALSE;
+
+	// スワップチューンからdescを取得する
+	DXGI_SWAP_CHAIN_DESC swcDesc = {};
+	result = swapChain_->GetDesc(&swcDesc);
+	// 取得出来ているか確認する
+	assert(SUCCEEDED(result));
+
+	// 各種設定を行い、ディスクリプタヒープを生成
+	D3D12_DESCRIPTOR_HEAP_DESC heapDesc{};
+	heapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV; // レンダーターゲットビュー
+	heapDesc.NumDescriptors = swcDesc.BufferCount;
+	result = device_->CreateDescriptorHeap(&heapDesc, IID_PPV_ARGS(&rtvHeap_));
+	// 生成出来ているかを確認する
+	assert(SUCCEEDED(result));
+
+	// 表と裏、二つの画面を生成する
+	backBuffers_.resize(swcDesc.BufferCount);
+	for (int i = 0; i < backBuffers_.size(); i++) {
+
+		// スワップチューンからResourceを取得する
+		result = swapChain_->GetBuffer(i, IID_PPV_ARGS(&backBuffers_[i]));
+		// 取得できているかを確認する
+		assert(SUCCEEDED(result));
+
+		// RTVの設定を行う
+		D3D12_RENDER_TARGET_VIEW_DESC rtvDesc{};
+		rtvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;      // 出力された結果をSRGBに変換し、書き込む
+		rtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D; // 2Dテクスチャ描画として書き込む
+
+		// ディスクリプタヒープのハンドルを取得
+		D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = GetCPUDescriptorHandle(
+			rtvHeap_.Get(), device_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV), i);
+
+		// レンダーターゲットを生成する
+		device_->CreateRenderTargetView(backBuffers_[i].Get(), &rtvDesc, rtvHandle);
+
+	}
 
 }

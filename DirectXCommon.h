@@ -34,16 +34,37 @@ public: // メンバ関数
 	void Initialize(WinApp* win, 
 		int32_t backBufferWidth = WinApp::kWindowWidth, int32_t backBufferHeight = WinApp::kwindowHeight);
 
+	/// <summary>
+	/// 描画前処理
+	/// </summary>
+	void PreDraw();
+
+	/// <summary>
+	/// 描画後処理
+	/// </summary>
+	void PostDraw();
+
+	/// <summary>
+	/// レンダーターゲットのクリアを行う関数
+	/// </summary>
+	void ClearRenderTarget();
+
 private: // メンバ変数
 
 	// ウィンドウズアプリケーションクラス
 	WinApp* winApp_;
 
 	// Direct3D関連
-	Microsoft::WRL::ComPtr<IDXGIFactory7> dxgiFactory_; // DXGIファクトリー
-	Microsoft::WRL::ComPtr<ID3D12Device> device_;       // デバイス
-	int32_t backBufferWidth_ = 0;						// ウィンドウ横幅
-	int32_t backBufferHeight_ = 0;						// ウィンドウ縦幅
+	Microsoft::WRL::ComPtr<IDXGIFactory7> dxgiFactory_;				  // DXGIファクトリー
+	Microsoft::WRL::ComPtr<ID3D12Device> device_;					  // デバイス
+	Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> commandList_;	  // コマンドリスト
+	Microsoft::WRL::ComPtr<ID3D12CommandAllocator> commandAllocator_; // コマンドアロケーター
+	Microsoft::WRL::ComPtr<ID3D12CommandQueue> commandQueue_;		  // コマンドキュー
+	Microsoft::WRL::ComPtr<IDXGISwapChain4> swapChain_;				  // スワップチューン
+	std::vector<Microsoft::WRL::ComPtr<ID3D12Resource>> backBuffers_; // バックバッファ
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> rtvHeap_;			  // RTVヒープ
+	int32_t backBufferWidth_ = 0;									  // ウィンドウ横幅
+	int32_t backBufferHeight_ = 0;									  // ウィンドウ縦幅
 
 private: // メンバ関数
 
@@ -54,9 +75,51 @@ private: // メンバ関数
 	const DirectXCommon& operator=(const DirectXCommon&) = delete;
 
 	/// <summary>
+	/// 特定のインデックスのディスクリプタハンドルを取得する関数(CPU)
+	/// </summary>
+	/// <param name="descriptorHeap">ディスクリプタヒープ</param>
+	/// <param name="descriptorSize">ディスクリプタサイズ</param>
+	/// <param name="index">取得するヒープのインデックス</param>
+	/// <returns>特定のインデックスのディスクリプタハンドル</returns>
+	D3D12_CPU_DESCRIPTOR_HANDLE GetCPUDescriptorHandle(ID3D12DescriptorHeap* descriptorHeap, uint32_t descriptorSize, uint32_t index);
+
+	/// <summary>
+	/// 特定のインデックスのディスクリプタハンドルを取得する関数(GPU)
+	/// </summary>
+	/// <param name="descriptorHeap">ディスクリプタヒープ</param>
+	/// <param name="descriptorSize">ディスクリプタサイズ</param>
+	/// <param name="index">取得するヒープのインデックス</param>
+	/// <returns>特定のインデックスのディスクリプタハンドル</returns>
+	D3D12_GPU_DESCRIPTOR_HANDLE GetGPUDescriptorHandle(ID3D12DescriptorHeap* descriptorHeap, uint32_t descriptorSize, uint32_t index);
+
+	/// <summary>
+	/// リソースバリアの切り替えを行う関数
+	/// </summary>
+	/// <param name="resource">リソース</param>
+	/// <param name="before">以前のステート</param>
+	/// <param name="after">以降のステート</param>
+	/// <returns>切り替えたリソースバリア</returns>
+	D3D12_RESOURCE_BARRIER SwitchResourceBarrier(ID3D12Resource* resource, D3D12_RESOURCE_STATES before, D3D12_RESOURCE_STATES after);
+
+	/// <summary>
 	/// DXGIデバイスの初期化
 	/// </summary>
 	void InitializeDXGIDevice();
+
+	/// <summary>
+	/// スワップチューンの作成関数
+	/// </summary>
+	void CreateSwapChain();
+
+	/// <summary>
+	/// コマンド関連の初期化
+	/// </summary>
+	void InitializeCommand();
+
+	/// <summary>
+	/// レンダーターゲット生成
+	/// </summary>
+	void CreateFinalRenderTargets();
 
 };
 

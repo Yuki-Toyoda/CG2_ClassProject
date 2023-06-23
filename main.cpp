@@ -31,6 +31,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 			// ゲーム固有の処理
 
+			// 描画開始
+			dxCommon->PreDraw();
+
+			// 描画終了
+			dxCommon->PostDraw();
 		}
 
 	}
