@@ -138,12 +138,18 @@
     <ClCompile Include="Debug.cpp" />
     <ClCompile Include="DirectXCommon.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="MyMath.cpp" />
     <ClCompile Include="WinApp.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Debug.h" />
     <ClInclude Include="DirectXCommon.h" />
-    <ClInclude Include="Struct.h" />
+    <ClInclude Include="Matrix4x4.h" />
+    <ClInclude Include="MyMath.h" />
+    <ClInclude Include="MyStruct.h" />
+    <ClInclude Include="Vector2.h" />
+    <ClInclude Include="Vector3.h" />
+    <ClInclude Include="Vector4.h" />
     <ClInclude Include="WinApp.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

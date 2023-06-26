@@ -40,7 +40,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	}
 
-	// 終了したら生成したオブジェクトの解放を行う
+	// ゲームウィンドウを閉じる
 	winApp->TerminateGameWindow();
 
 	// 終了

@@ -13,6 +13,15 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="ヘッダー ファイル\Math">
+      <UniqueIdentifier>{c08844c4-499c-4086-b02f-fca91c20f129}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\Math">
+      <UniqueIdentifier>{f07a9b73-8ae9-43cc-bbcc-8c1d5e4bcc21}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ヘッダー ファイル\Struct">
+      <UniqueIdentifier>{598f9648-1ba3-4cb3-88ac-b3d90126844f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -27,6 +36,9 @@
     <ClCompile Include="WinApp.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="MyMath.cpp">
+      <Filter>ソース ファイル\Math</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Debug.h">
@@ -38,8 +50,23 @@
     <ClInclude Include="WinApp.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Struct.h">
-      <Filter>ヘッダー ファイル</Filter>
+    <ClInclude Include="Vector3.h">
+      <Filter>ヘッダー ファイル\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Vector2.h">
+      <Filter>ヘッダー ファイル\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Vector4.h">
+      <Filter>ヘッダー ファイル\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Matrix4x4.h">
+      <Filter>ヘッダー ファイル\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="MyMath.h">
+      <Filter>ヘッダー ファイル\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="MyStruct.h">
+      <Filter>ヘッダー ファイル\Struct</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
