@@ -41,6 +41,8 @@ void DirectXCommon::Initialize(WinApp* win,
 	CreateSwapChain();
 	// レンダーターゲット生成
 	CreateFinalRenderTargets();
+	// フェンス生成
+	CreateFence();
 
 }
 
@@ -58,6 +60,7 @@ void DirectXCommon::PreDraw() {
 		backBuffers_[bbIndex].Get(), D3D12_RESOURCE_STATE_PRESENT,
 		D3D12_RESOURCE_STATE_RENDER_TARGET
 	);
+	commandList_->ResourceBarrier(1, &barrier);
 
 	// レンダーターゲットビュー用ディスクリプタヒープのハンドルを取得
 	D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = GetCPUDescriptorHandle(
@@ -82,6 +85,7 @@ void DirectXCommon::PostDraw() {
 		backBuffers_[bbIndex].Get(), D3D12_RESOURCE_STATE_RENDER_TARGET,
 		D3D12_RESOURCE_STATE_PRESENT
 	);
+	commandList_->ResourceBarrier(1, &barrier);
 
 	// コマンドリストの命令をクローズする
 	commandList_->Close();
@@ -92,6 +96,23 @@ void DirectXCommon::PostDraw() {
 
 	// GPUとOSに画面の交換を行うように指示する
 	swapChain_->Present(1, 0);
+
+	// GPUの処理がここまでたどり着いた時にFenceに指定した値を代入するようSignalを送る
+	commandQueue_->Signal(fence_.Get(), ++fenceVal_);
+
+	// FenceのSignal値が指定した値かどうかを確認する
+	if (fence_->GetCompletedValue() < fenceVal_) {
+		// FenceのSignalを待つためのイベントを生成
+		HANDLE fenceEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
+		// イベントが生成出来ているか確認
+		assert(fenceEvent != nullptr);
+		// 指定したSignal値にたどり着いていないため、待機するイベントを設定
+		fence_->SetEventOnCompletion(fenceVal_, fenceEvent);
+		// イベント終了まで待機
+		WaitForSingleObject(fenceEvent, INFINITE);
+		// 終了したら閉じる
+		CloseHandle(fenceEvent);
+	}
 
 	// 次フレーム用にコマンドアロケーターをリセット
 	result = commandAllocator_->Reset();
@@ -253,7 +274,7 @@ void DirectXCommon::InitializeDXGIDevice() {
 	// 初期化完了のログを出す
 	Debug::Log("Complete Create D3D12Device!!!\n");
 
-#ifndef _DEBUG
+#ifdef _DEBUG
 
 	// デバックでの実行時、エラーが出た場合警告を出す
 	Microsoft::WRL::ComPtr<ID3D12InfoQueue> infoQueue;
@@ -402,5 +423,20 @@ void DirectXCommon::CreateFinalRenderTargets() {
 		device_->CreateRenderTargetView(backBuffers_[i].Get(), &rtvDesc, rtvHandle);
 
 	}
+
+}
+
+/// <summary>
+/// フェンス生成関数
+/// </summary>
+void DirectXCommon::CreateFence() {
+
+	// 結果確認用
+	HRESULT result = S_FALSE;
+
+	// フェンス生成
+	result = device_->CreateFence(fenceVal_, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence_));
+	// フェンスを生成出来たか確認する
+	assert(SUCCEEDED(result));
 
 }

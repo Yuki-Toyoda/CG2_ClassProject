@@ -63,6 +63,8 @@ private: // メンバ変数
 	Microsoft::WRL::ComPtr<IDXGISwapChain4> swapChain_;				  // スワップチューン
 	std::vector<Microsoft::WRL::ComPtr<ID3D12Resource>> backBuffers_; // バックバッファ
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> rtvHeap_;			  // RTVヒープ
+	Microsoft::WRL::ComPtr<ID3D12Fence> fence_;						  // フェンス
+	UINT64 fenceVal_ = 0;											  // フェンスの値
 	int32_t backBufferWidth_ = 0;									  // ウィンドウ横幅
 	int32_t backBufferHeight_ = 0;									  // ウィンドウ縦幅
 
@@ -112,14 +114,19 @@ private: // メンバ関数
 	void CreateSwapChain();
 
 	/// <summary>
-	/// コマンド関連の初期化
+	/// コマンド関連の初期化関数
 	/// </summary>
 	void InitializeCommand();
 
 	/// <summary>
-	/// レンダーターゲット生成
+	/// レンダーターゲット生成関数
 	/// </summary>
 	void CreateFinalRenderTargets();
+
+	/// <summary>
+	/// フェンス生成関数
+	/// </summary>
+	void CreateFence();
 
 };
 
