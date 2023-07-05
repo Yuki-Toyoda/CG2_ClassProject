@@ -4,6 +4,7 @@
 #include <string>
 #include <wrl.h>
 #include <dxcapi.h>
+#include "DirectXCommon.h"
 #include "MyMath.h"
 #include "MyStruct.h"
 #include "Debug.h"

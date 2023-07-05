@@ -66,8 +66,23 @@ void DirectXCommon::PreDraw() {
 	D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = GetCPUDescriptorHandle(
 		rtvHeap_.Get(), device_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV), bbIndex);
 
+	//
+	commandList_->OMSetRenderTargets(1, &rtvHandle, false, nullptr);
+
 	// 画面をクリアする
 	ClearRenderTarget();
+
+	viewport.Width = WinApp::kWindowWidth;
+	viewport.Height = WinApp::kwindowHeight;
+	viewport.TopLeftX = 0;
+	viewport.TopLeftY = 0;
+	viewport.MinDepth = 0.0f;
+	viewport.MaxDepth = 1.0f;
+
+	scissorRect.left = 0;
+	scissorRect.right = WinApp::kWindowWidth;
+	scissorRect.top = 0;
+	scissorRect.bottom = WinApp::kwindowHeight;
 
 }
 

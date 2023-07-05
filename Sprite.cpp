@@ -143,7 +143,7 @@ void Sprite::StaticInitialize(
 
 	// 利用するトポロジーのタイプ
 	graphicsPipelineStateDesc.PrimitiveTopologyType =
-		D3D12_PRIMITIVE_TOPOLOGY_TYPE_POINT; // 3角形
+		D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE; // 3角形
 
 	// どのように画面に色を打ち込むかの設定
 	graphicsPipelineStateDesc.SampleDesc.Count = 1;
@@ -169,12 +169,30 @@ void Sprite::PreDraw(ID3D12GraphicsCommandList* cmdList) {
 	// コマンドリストをセットする
 	sCommandList_ = cmdList;
 
+	D3D12_VIEWPORT viewport{};
+	viewport.Width = WinApp::kWindowWidth;
+	viewport.Height = WinApp::kwindowHeight;
+	viewport.TopLeftX = 0;
+	viewport.TopLeftY = 0;
+	viewport.MinDepth = 0.0f;
+	viewport.MaxDepth = 1.0f;
+
+	D3D12_RECT scissorRect{};
+	scissorRect.left = 0;
+	scissorRect.right = WinApp::kWindowWidth;
+	scissorRect.top = 0;
+	scissorRect.bottom = WinApp::kwindowHeight;
+
+	sCommandList_->RSSetViewports(1, &viewport);
+
+	sCommandList_->RSSetScissorRects(1, &scissorRect);
+
 	// パイプラインステートの設定
 	sCommandList_->SetPipelineState(sPipelineStates_.Get());
 	// ルートシグネチャの設定
 	sCommandList_->SetGraphicsRootSignature(sRootSignature_.Get());
 	// プリミティブ形状の設定を行う
-	sCommandList_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_POINTLIST);
+	sCommandList_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 }
 
@@ -306,7 +324,7 @@ Sprite* Sprite::Create(
 ) {
 
 	// 仮のサイズ
-	Vector2 size = { 1.0f, 1.0f };
+	Vector2 size = { 0.5f, 0.5f };
 
 	// スプライトのインスタンスを生成する
 	Sprite* sprite =

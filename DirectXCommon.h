@@ -55,6 +55,13 @@ public: // メンバ関数
 	/// <returns>デバイス</returns>
 	ID3D12Device* GetDevice() { return device_.Get(); }
 
+	/// <summary>
+	/// 
+	/// </summary>
+	/// <returns></returns>
+	D3D12_VIEWPORT GetViewPort() { return viewport; }
+
+	D3D12_RECT GetScissorRect() { return scissorRect; }
 
 	ID3D12GraphicsCommandList* GetCommandList() { return commandList_.Get(); }
 
@@ -76,6 +83,9 @@ private: // メンバ変数
 	UINT64 fenceVal_ = 0;											  // フェンスの値
 	int32_t backBufferWidth_ = 0;									  // ウィンドウ横幅
 	int32_t backBufferHeight_ = 0;									  // ウィンドウ縦幅
+
+	D3D12_VIEWPORT viewport{};
+	D3D12_RECT scissorRect{};
 
 private: // メンバ関数
 
