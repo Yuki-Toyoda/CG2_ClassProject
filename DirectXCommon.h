@@ -49,6 +49,15 @@ public: // メンバ関数
 	/// </summary>
 	void ClearRenderTarget();
 
+	/// <summary>
+	/// デバイスの取得関数
+	/// </summary>
+	/// <returns>デバイス</returns>
+	ID3D12Device* GetDevice() { return device_.Get(); }
+
+
+	ID3D12GraphicsCommandList* GetCommandList() { return commandList_.Get(); }
+
 private: // メンバ変数
 
 	// ウィンドウズアプリケーションクラス

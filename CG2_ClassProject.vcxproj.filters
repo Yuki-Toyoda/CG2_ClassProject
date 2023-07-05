@@ -39,6 +39,12 @@
     <ClCompile Include="MyMath.cpp">
       <Filter>ソース ファイル\Math</Filter>
     </ClCompile>
+    <ClCompile Include="Sprite.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="GameScene.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Debug.h">
@@ -68,5 +74,18 @@
     <ClInclude Include="MyStruct.h">
       <Filter>ヘッダー ファイル\Struct</Filter>
     </ClInclude>
+    <ClInclude Include="Sprite.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="GameScene.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="SafeDelete.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="SpliteVS.hlsl" />
+    <FxCompile Include="SplitePS.hlsl" />
   </ItemGroup>
 </Project>

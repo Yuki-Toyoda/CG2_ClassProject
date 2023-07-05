@@ -2,6 +2,7 @@
 #include <cassert>
 #include <cmath>
 #include <numbers>
+#include "Vector2.h"
 #include "Vector3.h"
 #include "Matrix4x4.h"
 #include "MyStruct.h"
@@ -174,6 +175,12 @@ public:
 		/// <param name="rotate">回転角</param>
 		/// <returns>全ての軸の回転行列</returns>
 		static Matrix4x4 MakeRotateXYZMatrix(const Vector3& rotate);
+
+		/// <summary>
+		/// 単位行列を作成する関数
+		/// </summary>
+		/// <returns></returns>
+		static Matrix4x4 MakeIdentity4x4();
 
 		/// <summary>
 		/// アフィン変換行列を生成する関数
