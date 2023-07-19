@@ -11,6 +11,13 @@ struct VertexData {
 };
 
 /// <summary>
+/// 定数バッファデータ構造体
+/// </summary>
+struct MaterialData {
+	Vector4 color;
+};
+
+/// <summary>
 /// 球構造体
 /// </summary>
 struct Sphere {

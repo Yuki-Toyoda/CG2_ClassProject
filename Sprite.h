@@ -64,6 +64,14 @@ public: // 静的メンバ関数
 		const std::wstring& filePath,
 		const wchar_t* profile);
 
+	/// <summary>
+	/// バッファリソース作成関数
+	/// </summary>
+	/// <param name="device">作成に使用するデバイス</param>
+	/// <param name="sizeInBytes">サイズ</param>
+	/// <returns></returns>
+	static Microsoft::WRL::ComPtr<ID3D12Resource> CreateBufferResource(ID3D12Device* device, size_t sizeInBytes);
+
 private: // 静的なメンバ変数
 
 	// 頂点数
@@ -116,8 +124,12 @@ private: // メンバ変数
 
 	// 頂点バッファ
 	Microsoft::WRL::ComPtr<ID3D12Resource> vertBuff_;
+	// 定数バッファ
+	Microsoft::WRL::ComPtr<ID3D12Resource> constBuff_;
 	// 頂点バッファマップ
 	VertexData* vertMap_ = nullptr;
+	// 定数バッファマップ
+	MaterialData* constMap_ = nullptr;
 
 	// 頂点バッファビュー
 	D3D12_VERTEX_BUFFER_VIEW vbView_{};

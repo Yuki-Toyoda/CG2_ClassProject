@@ -312,6 +312,47 @@ IDxcBlob* Sprite::CompileShader(
 }
 
 /// <summary>
+/// バッファリソース作成関数
+/// </summary>
+/// <param name="device">作成に使用するデバイス</param>
+/// <param name="sizeInBytes">サイズ</param>
+/// <returns></returns>
+ComPtr<ID3D12Resource> Sprite::CreateBufferResource(ID3D12Device* device, size_t sizeInBytes) {
+
+	// 結果確認用
+	HRESULT result = S_FALSE;
+
+	// 頂点リソース用のヒープを設定する
+	D3D12_HEAP_PROPERTIES uploadHeapProperties{};
+	uploadHeapProperties.Type = D3D12_HEAP_TYPE_UPLOAD; // uploadHeapを使う
+	// 頂点リソースの設定
+	D3D12_RESOURCE_DESC vertexResourceDesc{};
+	// バッファリソース テクスチャの場合はまた別の設定を行う
+	vertexResourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
+	vertexResourceDesc.Width = sizeInBytes; // リソースのサイズ　今回はVector4を3頂点分(怪しい)
+
+	// バッファの場合これらを1にする
+	vertexResourceDesc.Height = 1;
+	vertexResourceDesc.DepthOrArraySize = 1;
+	vertexResourceDesc.MipLevels = 1;
+	vertexResourceDesc.SampleDesc.Count = 1;
+
+	// バッファの場合これにする
+	vertexResourceDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+
+	// 実際に頂点リソースを作成
+	ComPtr<ID3D12Resource>vertexResource = nullptr;
+	result = device->CreateCommittedResource(&uploadHeapProperties, D3D12_HEAP_FLAG_NONE,
+		&vertexResourceDesc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr,
+		IID_PPV_ARGS(&vertexResource));
+
+	assert(SUCCEEDED(result));
+
+	return vertexResource;
+
+}
+
+/// <summary>
 /// スプライト生成関数
 /// </summary>
 /// <param name="position">座標</param>
@@ -382,29 +423,8 @@ bool Sprite::Initialize() {
 	// 結果確認用
 	HRESULT result = S_FALSE;
 
-	// 頂点リソースのヒープ設定
-	D3D12_HEAP_PROPERTIES vertexHeapProperties{};
-	vertexHeapProperties.Type = D3D12_HEAP_TYPE_UPLOAD; // uploadHeapを使用する
-
-	// 頂点リソースの設定
-	D3D12_RESOURCE_DESC vertexResourceDesc{};
-	// バッファリソース
-	vertexResourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
-	vertexResourceDesc.Width = sizeof(VertexData) * 3;
-	// バッファの場合はこれらを1にする
-	vertexResourceDesc.Height = 1;
-	vertexResourceDesc.DepthOrArraySize = 1;
-	vertexResourceDesc.MipLevels = 1;
-	vertexResourceDesc.SampleDesc.Count = 1;
-	// バッファの場合はこれにする
-	vertexResourceDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
-
-	// 実際に頂点リソースを作成する
-	result = sDevice_->CreateCommittedResource(&vertexHeapProperties, D3D12_HEAP_FLAG_NONE,
-		&vertexResourceDesc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&vertBuff_));
-	// 生成出来ているかを確認する
-	assert(SUCCEEDED(result));
-
+	// 頂点バッファリソース生成
+	vertBuff_ = CreateBufferResource(sDevice_, sizeof(VertexData) * 3);
 	// 頂点バッファのマッピングを行う
 	result = vertBuff_->Map(0, nullptr, reinterpret_cast<void**>(&vertMap_));
 	// マッピング出来ているかを確認する
@@ -419,6 +439,13 @@ bool Sprite::Initialize() {
 	vbView_.SizeInBytes = sizeof(VertexData) * 3;
 	// 1頂点アドレスを設定する
 	vbView_.StrideInBytes = sizeof(VertexData);
+
+	// 定数バッファリソース作成
+	constBuff_ = CreateBufferResource(sDevice_, sizeof(MaterialData));
+	// 定数バッファのマッピングを行う
+	result = constBuff_->Map(0, nullptr, reinterpret_cast<void**>(&constMap_));
+	// マッピングできているかを確認する
+	assert(SUCCEEDED(result));
 
 	// 初期化が完了したらTrueを返す
 	return true;
@@ -435,8 +462,13 @@ void Sprite::Draw(Matrix4x4 vpMatrix) {
 	Matrix4x4 worldMatrix = MyMath::MakeAffineMatrix(transform_.scale, transform_.rotate, transform_.translate);
 	matWorld_ = MyMath::Multiply(worldMatrix, vpMatrix);
 
+	// 色を設定
+	constMap_->color = color_;
+
 	// 頂点バッファの設定
 	sCommandList_->IASetVertexBuffers(0, 1, &vbView_);
+	// 定数バッファの設定
+	sCommandList_->SetGraphicsRootConstantBufferView(0, constBuff_->GetGPUVirtualAddress());
 
 	// 描画コマンド
 	sCommandList_->DrawInstanced(3, 1, 0, 0);
