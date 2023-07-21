@@ -20,7 +20,7 @@ void GameScene::Initialize() {
 	dxCommon_ = DirectXCommon::GetInstance();
 
 	// スプライトの初期化
-	sprite_ = Sprite::Create({ 0.0f, 0.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f });
+	sprite_ = Sprite::Create({ 0.0f, 0.0f }, { 1.0f, 0.0f, 0.0f, 1.0f }, { 0.0f, 0.0f });
 
 	// カメラ初期化
 	cameraMatrix_ = MyMath::MakeAffineMatrix(scale_, rotate_, translate_);

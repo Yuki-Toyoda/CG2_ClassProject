@@ -114,11 +114,11 @@ void Sprite::StaticInitialize(
 	ComPtr<IDxcBlob> pixelBlob;
 
 	// 頂点シェーダをコンパイルする
-	vertexBlob = CompileShader(L"SpliteVS.hlsl", L"vs_6_0");
+	vertexBlob = CompileShader(L"SpriteVS.hlsl", L"vs_6_0");
 	// コンパイル出来たか確認する
 	assert(vertexBlob != nullptr);
 	// ピクセルシェーダをコンパイルする
-	pixelBlob = CompileShader(L"SplitePS.hlsl", L"ps_6_0");
+	pixelBlob = CompileShader(L"SpritePS.hlsl", L"ps_6_0");
 	// コンパイル出来たか確認する
 	assert(pixelBlob != nullptr);
 
