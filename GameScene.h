@@ -40,7 +40,7 @@ private: // メンバ変数
 	DirectXCommon* dxCommon_ = nullptr;
 
 	// カメラ座標
-	Vector3 translate_ = { 0.0f, 0.0f, -100.0f };
+	Vector3 translate_ = { 0.0f, 0.0f, -10.0f };
 	// カメラ拡大率
 	Vector3 scale_ = { 1.0f, 1.0f, 1.0f };
 	// カメラ回転角

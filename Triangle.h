@@ -43,7 +43,7 @@ public: // 静的メンバ関数
 	/// <param name="anchorPoint">アンカーポイント</param>
 	/// <returns>生成されたスプライト</returns>
 	static Triangle* Create(
-		Vector2 position, Vector4 color = { 1,1,1,1 },
+		Vector3 position, Vector2 size = {1.0f, 1.0f}, Vector4 color = {1,1,1,1},
 		Vector2 anchorPoint = { 0.0f, 0.0f }
 	);
 
@@ -106,7 +106,7 @@ public: // メンバ関数
 	/// <summary>
 	/// コンストラクタ
 	/// </summary>
-	Triangle(Vector2 position, Vector2 size,
+	Triangle(Vector3 position, Vector2 size,
 		Vector4 color, Vector2 anchorPoint);
 
 	/// <summary>

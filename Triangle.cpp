@@ -58,14 +58,10 @@ void Triangle::StaticInitialize(
 	descriptionRootSignature.Flags =
 		D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
 	// ルートパラメータを設定する
-	D3D12_ROOT_PARAMETER rootParameters[2] = {};
+	D3D12_ROOT_PARAMETER rootParameters[1] = {};
 	rootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
-	rootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+	rootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 	rootParameters[0].Descriptor.ShaderRegister = 0;
-	rootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
-	rootParameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
-	rootParameters[1].Descriptor.ShaderRegister = 0;
-
 	descriptionRootSignature.pParameters = rootParameters;
 	descriptionRootSignature.NumParameters = _countof(rootParameters);
 
@@ -361,12 +357,9 @@ ComPtr<ID3D12Resource> Triangle::CreateBufferResource(ID3D12Device* device, size
 /// <param name="anchorPoint">アンカーポイント</param>
 /// <returns>生成されたスプライト</returns>
 Triangle* Triangle::Create(
-	Vector2 position, Vector4 color,
+	Vector3 position, Vector2 size, Vector4 color,
 	Vector2 anchorPoint
 ) {
-
-	// 仮のサイズ
-	Vector2 size = { 0.5f, 0.5f };
 
 	// スプライトのインスタンスを生成する
 	Triangle* sprite =
@@ -398,12 +391,11 @@ Triangle::Triangle() {}
 /// <summary>
 /// コンストラクタ
 /// </summary>
-Triangle::Triangle(Vector2 position, Vector2 size,
+Triangle::Triangle(Vector3 position, Vector2 size,
 	Vector4 color, Vector2 anchorPoint) {
 
 	// 引数の値をメンバ変数に代入する
-	transform_.translate.x = position.x;
-	transform_.translate.y = position.y;
+	transform_.translate = position;
 	transform_.scale.x = size.x;
 	transform_.scale.y = size.y;
 	anchorPoint_ = anchorPoint;
@@ -490,12 +482,22 @@ void Triangle::TransferVertices() {
 		RB, // 右下
 	};
 
+	// 4頂点の座標を設定
+	float left = (0.0f - anchorPoint_.x) * transform_.scale.x;
+	float right = (1.0f - anchorPoint_.x) * transform_.scale.x;
+	float top = (1.0f - anchorPoint_.y) * transform_.scale.y;
+	float bottom = (0.0f - anchorPoint_.y) * transform_.scale.y;
+
 	// 頂点データ
 	VertexData vertices[kVertexNum];
 
-	vertices[LB].position = { -transform_.scale.x, transform_.translate.y - transform_.scale.y, 0.0f, 1.0f };  // 左下
-	vertices[T].position = { transform_.translate.x, transform_.translate.y + transform_.scale.y, 0.0f, 1.0f };     // 左上
-	vertices[RB].position = { transform_.translate.x + transform_.scale.x, transform_.translate.y - transform_.scale.y, 0.0f, 1.0f }; // 右下
+	//vertices[LB].position = { -transform_.scale.x, -transform_.scale.y, 0.0f, 1.0f };  // 左下
+	//vertices[T].position = { 0.0f, transform_.scale.y, 0.0f, 1.0f };     // 上
+	//vertices[RB].position = { transform_.scale.x, -transform_.scale.y, 0.0f, 1.0f }; // 右下
+
+	vertices[LB].position = { left, bottom, 0.0f, 1.0f };  // 左下
+	vertices[T].position = { 0.0f, top, 0.0f, 1.0f };     // 上
+	vertices[RB].position = { right, bottom, 0.0f, 1.0f }; // 右下
 
 	// 頂点バッファへのデータ転送を行う
 	memcpy(vertMap_, vertices, sizeof(vertices));

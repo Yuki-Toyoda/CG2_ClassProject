@@ -1,8 +1,9 @@
 // 変換行列
-struct TransformaitonMatrix
+cbuffer constBuffer : register(b0)
 {
+    float4 color;
     float4x4 mat;
-};
+}
 
 // 頂点シェーダ出力用
 struct VertexShaderOutput

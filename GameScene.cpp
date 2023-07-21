@@ -20,7 +20,7 @@ void GameScene::Initialize() {
 	dxCommon_ = DirectXCommon::GetInstance();
 
 	// スプライトの初期化
-	sprite_ = Triangle::Create({ 0.0f, 0.0f }, { 1.0f, 0.0f, 0.0f, 1.0f }, { 0.0f, 0.0f });
+	sprite_ = Triangle::Create({ 0.0f, 0.0f, 0.0f }, { 1.0f, 1.0f }, { 1.0f, 0.0f, 0.0f, 1.0f }, { 0.5f, 0.5f });
 
 	// カメラ初期化
 	cameraMatrix_ = MyMath::MakeAffineMatrix(scale_, rotate_, translate_);
@@ -34,9 +34,7 @@ void GameScene::Initialize() {
 /// </summary>
 void GameScene::Update() {
 
-	rotation.y += 0.1f;
-
-	rotate_.y += 0.1f;
+	rotation.y += 0.01f;
 
 	sprite_->SetRotation(rotation);
 
