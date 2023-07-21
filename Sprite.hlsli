@@ -1,3 +1,9 @@
+// 変換行列
+struct TransformaitonMatrix
+{
+    float4x4 mat;
+};
+
 // 頂点シェーダ出力用
 struct VertexShaderOutput
 {

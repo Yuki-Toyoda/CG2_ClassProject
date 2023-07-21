@@ -15,6 +15,7 @@ struct VertexData {
 /// </summary>
 struct MaterialData {
 	Vector4 color;
+	Matrix4x4 mat;
 };
 
 /// <summary>

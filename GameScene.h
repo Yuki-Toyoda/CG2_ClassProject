@@ -1,6 +1,6 @@
 #pragma once
 #include "DirectXCommon.h"
-#include "Sprite.h"
+#include "Triangle.h"
 
 /// <summary>
 /// ゲームシーン
@@ -56,7 +56,9 @@ private: // メンバ変数
 	Matrix4x4 viewProjectionMatrix_;
 
 	// スプライト
-	Sprite* sprite_ = nullptr;
+	Triangle* sprite_ = nullptr;
+
+	Vector3 rotation = { 0.0f, 0.0f, 0.0f };
 
 };
 

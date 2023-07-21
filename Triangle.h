@@ -11,7 +11,10 @@
 
 #pragma comment(lib, "dxcompiler.lib")
 
-class Sprite
+/// <summary>
+/// 三角形描画クラス
+/// </summary>
+class Triangle
 {
 public: // 静的メンバ関数
 
@@ -19,9 +22,7 @@ public: // 静的メンバ関数
 	/// 静的初期化関数
 	/// </summary>
 	/// <param name="device">DXGIデバイス</param>
-	static void StaticInitialize(
-		ID3D12Device* device
-	);
+	static void StaticInitialize(ID3D12Device* device);
 
 	/// <summary>
 	/// 描画前処理
@@ -41,7 +42,7 @@ public: // 静的メンバ関数
 	/// <param name="color">色</param>
 	/// <param name="anchorPoint">アンカーポイント</param>
 	/// <returns>生成されたスプライト</returns>
-	static Sprite* Create(
+	static Triangle* Create(
 		Vector2 position, Vector4 color = { 1,1,1,1 },
 		Vector2 anchorPoint = { 0.0f, 0.0f }
 	);
@@ -101,11 +102,11 @@ public: // メンバ関数
 	/// <summary>
 	/// コンストラクタ
 	/// </summary>
-	Sprite();
+	Triangle();
 	/// <summary>
 	/// コンストラクタ
 	/// </summary>
-	Sprite(Vector2 position, Vector2 size,
+	Triangle(Vector2 position, Vector2 size,
 		Vector4 color, Vector2 anchorPoint);
 
 	/// <summary>
@@ -119,6 +120,20 @@ public: // メンバ関数
 	/// </summary>
 	/// <param name="vpMatrix">ビュープロジェクション行列</param>
 	void Draw(Matrix4x4 vpMatrix);
+
+	/// <summary>
+	/// ポジションのセッター
+	/// </summary>
+	/// /// <param name="translation">セットする座標</param>
+	void SetPosition(const Vector3& translation) { transform_.translate = translation;}
+	/// <summary>
+	/// 回転角のセッター
+	/// </summary>
+	/// <param name="rotation"></param>
+	void SetRotation(const Vector3& rotation) { 
+		transform_.rotate = rotation;
+		TransferVertices();
+	}
 
 private: // メンバ変数
 

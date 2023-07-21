@@ -1,4 +1,4 @@
-#include "Sprite.h"
+#include "Triangle.h"
 #include <cassert>
 #include <d3dcompiler.h>
 
@@ -9,24 +9,24 @@ using namespace Microsoft::WRL;
 // 静的なメンバ変数の実体を宣言する
 
 // デバイス
-ID3D12Device* Sprite::sDevice_ = nullptr;
+ID3D12Device* Triangle::sDevice_ = nullptr;
 
 // コマンドリスト
-ID3D12GraphicsCommandList* Sprite::sCommandList_ = nullptr;
+ID3D12GraphicsCommandList* Triangle::sCommandList_ = nullptr;
 // ルートシグネチャ
-ComPtr<ID3D12RootSignature> Sprite::sRootSignature_;
+ComPtr<ID3D12RootSignature> Triangle::sRootSignature_;
 // パイプラインステートオブジェクト
-ComPtr<ID3D12PipelineState> Sprite::sPipelineStates_;
+ComPtr<ID3D12PipelineState> Triangle::sPipelineStates_;
 
 // dxcUtils
-ComPtr<IDxcUtils> Sprite::dxcUtils_ = nullptr;
+ComPtr<IDxcUtils> Triangle::dxcUtils_ = nullptr;
 // dxcコンパイラ
-ComPtr<IDxcCompiler3> Sprite::dxcCompiler_ = nullptr;
+ComPtr<IDxcCompiler3> Triangle::dxcCompiler_ = nullptr;
 // InludeHandler
-ComPtr<IDxcIncludeHandler> Sprite::dxcIncludeHandler_ = nullptr;
+ComPtr<IDxcIncludeHandler> Triangle::dxcIncludeHandler_ = nullptr;
 
 // 正射影行列
-Matrix4x4 Sprite::sMatProjection_;
+Matrix4x4 Triangle::sMatProjection_;
 
 /// <summary>
 /// 静的初期化関数
@@ -34,7 +34,7 @@ Matrix4x4 Sprite::sMatProjection_;
 /// <param name="device">DXGIデバイス</param>
 /// <param name="window_Width">画面横幅</param>
 /// <param name="window_Height">画面縦幅</param>
-void Sprite::StaticInitialize(
+void Triangle::StaticInitialize(
 	ID3D12Device* device
 ) {
 
@@ -58,10 +58,13 @@ void Sprite::StaticInitialize(
 	descriptionRootSignature.Flags =
 		D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
 	// ルートパラメータを設定する
-	D3D12_ROOT_PARAMETER rootParameters[1] = {};
+	D3D12_ROOT_PARAMETER rootParameters[2] = {};
 	rootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
-	rootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+	rootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 	rootParameters[0].Descriptor.ShaderRegister = 0;
+	rootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+	rootParameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
+	rootParameters[1].Descriptor.ShaderRegister = 0;
 
 	descriptionRootSignature.pParameters = rootParameters;
 	descriptionRootSignature.NumParameters = _countof(rootParameters);
@@ -124,8 +127,6 @@ void Sprite::StaticInitialize(
 
 	// ルートシグネチャ
 	graphicsPipelineStateDesc.pRootSignature = sRootSignature_.Get();
-	// インプットレイアウト
-	//graphicsPipelineStateDesc.InputLayout = inputLayoutDesc;
 	// 頂点シェーダ
 	graphicsPipelineStateDesc.VS = { vertexBlob->GetBufferPointer(),
 	vertexBlob->GetBufferSize() };
@@ -161,10 +162,10 @@ void Sprite::StaticInitialize(
 /// 描画前処理
 /// </summary>
 /// <param name="cmdList">描画コマンドリスト</param>
-void Sprite::PreDraw(ID3D12GraphicsCommandList* cmdList) {
+void Triangle::PreDraw(ID3D12GraphicsCommandList* cmdList) {
 
 	// PreDrawとPostDrawがペアで呼ばれていない場合はエラー
-	assert(Sprite::sCommandList_ == nullptr);
+	assert(Triangle::sCommandList_ == nullptr);
 
 	// コマンドリストをセットする
 	sCommandList_ = cmdList;
@@ -199,17 +200,17 @@ void Sprite::PreDraw(ID3D12GraphicsCommandList* cmdList) {
 /// <summary>
 /// 描画後処理
 /// </summary>
-void Sprite::PostDraw() {
+void Triangle::PostDraw() {
 
 	// 取得したコマンドリストを削除する
-	Sprite::sCommandList_ = nullptr;
+	Triangle::sCommandList_ = nullptr;
 
 }
 
 /// <summary>
 /// DXCの初期化関数
 /// </summary>
-void Sprite::InitializeDXC() {
+void Triangle::InitializeDXC() {
 
 	// 結果確認用
 	HRESULT result = S_FALSE;
@@ -237,7 +238,7 @@ void Sprite::InitializeDXC() {
 /// <param name="filePath">compilerするSharderファイルへのパス</param>
 /// <param name="profile">compilerに使用するprofile</param>
 /// <returns>コンパイル済みシェーダー</returns>
-IDxcBlob* Sprite::CompileShader(
+IDxcBlob* Triangle::CompileShader(
 	const std::wstring& filePath,
 	const wchar_t* profile) {
 
@@ -317,7 +318,7 @@ IDxcBlob* Sprite::CompileShader(
 /// <param name="device">作成に使用するデバイス</param>
 /// <param name="sizeInBytes">サイズ</param>
 /// <returns></returns>
-ComPtr<ID3D12Resource> Sprite::CreateBufferResource(ID3D12Device* device, size_t sizeInBytes) {
+ComPtr<ID3D12Resource> Triangle::CreateBufferResource(ID3D12Device* device, size_t sizeInBytes) {
 
 	// 結果確認用
 	HRESULT result = S_FALSE;
@@ -359,7 +360,7 @@ ComPtr<ID3D12Resource> Sprite::CreateBufferResource(ID3D12Device* device, size_t
 /// <param name="color">色</param>
 /// <param name="anchorPoint">アンカーポイント</param>
 /// <returns>生成されたスプライト</returns>
-Sprite* Sprite::Create(
+Triangle* Triangle::Create(
 	Vector2 position, Vector4 color,
 	Vector2 anchorPoint
 ) {
@@ -368,8 +369,8 @@ Sprite* Sprite::Create(
 	Vector2 size = { 0.5f, 0.5f };
 
 	// スプライトのインスタンスを生成する
-	Sprite* sprite =
-		new Sprite(position, size, color, anchorPoint);
+	Triangle* sprite =
+		new Triangle(position, size, color, anchorPoint);
 	// スプライトの中身がnullならnullを返す
 	if (sprite == nullptr) {
 		return nullptr;
@@ -392,12 +393,12 @@ Sprite* Sprite::Create(
 /// <summary>
 /// コンストラクタ
 /// </summary>
-Sprite::Sprite() {}
+Triangle::Triangle() {}
 
 /// <summary>
 /// コンストラクタ
 /// </summary>
-Sprite::Sprite(Vector2 position, Vector2 size,
+Triangle::Triangle(Vector2 position, Vector2 size,
 	Vector4 color, Vector2 anchorPoint) {
 
 	// 引数の値をメンバ変数に代入する
@@ -415,7 +416,7 @@ Sprite::Sprite(Vector2 position, Vector2 size,
 /// 初期化
 /// </summary>
 /// <returns>初期化出来ているか</returns>
-bool Sprite::Initialize() {
+bool Triangle::Initialize() {
 
 	// NULLチェック
 	assert(sDevice_);
@@ -456,7 +457,7 @@ bool Sprite::Initialize() {
 /// 描画関数
 /// </summary>
 /// <param name="vpMatrix">ビュープロジェクション行列</param>
-void Sprite::Draw(Matrix4x4 vpMatrix) {
+void Triangle::Draw(Matrix4x4 vpMatrix) {
 
 	// 行列変換
 	Matrix4x4 worldMatrix = MyMath::MakeAffineMatrix(transform_.scale, transform_.rotate, transform_.translate);
@@ -464,6 +465,8 @@ void Sprite::Draw(Matrix4x4 vpMatrix) {
 
 	// 色を設定
 	constMap_->color = color_;
+	// 行列を設定
+	constMap_->mat = matWorld_;
 
 	// 頂点バッファの設定
 	sCommandList_->IASetVertexBuffers(0, 1, &vbView_);
@@ -478,7 +481,7 @@ void Sprite::Draw(Matrix4x4 vpMatrix) {
 /// <summary>
 /// 頂点データ転送関数
 /// </summary>
-void Sprite::TransferVertices() {
+void Triangle::TransferVertices() {
 
 	// 頂点
 	enum {
@@ -487,18 +490,12 @@ void Sprite::TransferVertices() {
 		RB, // 右下
 	};
 
-	// 4頂点の座標を設定
-	/*float left = (0.0f - anchorPoint_.x) * size_.x;
-	float right = (1.0f - anchorPoint_.x) * size_.x;
-	float top = (0.0f - anchorPoint_.y) * size_.y;
-	float bottom = (1.0f - anchorPoint_.y) * size_.y;*/
-
 	// 頂点データ
 	VertexData vertices[kVertexNum];
 
-	vertices[LB].position = { -transform_.scale.x, -transform_.scale.y, 0.0f, 1.0f };  // 左下
-	vertices[T].position = { 0.0f, transform_.scale.y, 0.0f, 1.0f };     // 左上
-	vertices[RB].position = { transform_.scale.x, -transform_.scale.y, 0.0f, 1.0f }; // 右下
+	vertices[LB].position = { -transform_.scale.x, transform_.translate.y - transform_.scale.y, 0.0f, 1.0f };  // 左下
+	vertices[T].position = { transform_.translate.x, transform_.translate.y + transform_.scale.y, 0.0f, 1.0f };     // 左上
+	vertices[RB].position = { transform_.translate.x + transform_.scale.x, transform_.translate.y - transform_.scale.y, 0.0f, 1.0f }; // 右下
 
 	// 頂点バッファへのデータ転送を行う
 	memcpy(vertMap_, vertices, sizeof(vertices));
