@@ -44,7 +44,11 @@ void GameScene::Update() {
 	projectionMatrix_ = MyMath::MakePerspectiveFovMatrix(0.45f, float(WinApp::kWindowWidth) / float(WinApp::kwindowHeight), 0.1f, 100.0f);
 	viewProjectionMatrix_ = MyMath::Multiply(viewMatrix_, projectionMatrix_);
 
-	ImGui::ShowDemoWindow();
+	Vector3 rotationCheck = sprite_->GetRotation();
+
+	ImGui::Begin("Triangle");
+	ImGui::DragFloat3("rotation", &rotationCheck.x, 0.01f);
+	ImGui::End();
 
 }
 

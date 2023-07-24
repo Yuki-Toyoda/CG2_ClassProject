@@ -122,10 +122,19 @@ public: // メンバ関数
 	void Draw(Matrix4x4 vpMatrix);
 
 	/// <summary>
-	/// ポジションのセッター
+	/// スプライト中心座標のセッター
 	/// </summary>
 	/// /// <param name="translation">セットする座標</param>
-	void SetPosition(const Vector3& translation) { transform_.translate = translation;}
+	void SetPosition(const Vector3& translation) { 
+		transform_.translate = translation;
+		TransferVertices();
+	}
+	/// <summary>
+	/// スプライト中心座標のゲッター
+	/// </summary>
+	/// <returns>中心座標</returns>
+	Vector3 GetPosition() { return transform_.translate; }
+
 	/// <summary>
 	/// 回転角のセッター
 	/// </summary>
@@ -134,6 +143,11 @@ public: // メンバ関数
 		transform_.rotate = rotation;
 		TransferVertices();
 	}
+	/// <summary>
+	/// 回転角のゲッター
+	/// </summary>
+	/// <returns></returns>
+	Vector3 GetRotation() { return transform_.rotate; }
 
 private: // メンバ変数
 
