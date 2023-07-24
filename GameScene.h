@@ -2,6 +2,8 @@
 #include "DirectXCommon.h"
 #include "Triangle.h"
 
+#include "externals/imgui/imgui.h"
+
 /// <summary>
 /// ゲームシーン
 /// </summary>

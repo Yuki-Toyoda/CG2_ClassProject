@@ -55,6 +55,8 @@ public: // メンバ関数
 	/// <returns>デバイス</returns>
 	ID3D12Device* GetDevice() { return device_.Get(); }
 
+	IDXGISwapChain4* GetSwapChain() { return swapChain_.Get(); }
+
 	/// <summary>
 	/// 
 	/// </summary>
@@ -64,6 +66,8 @@ public: // メンバ関数
 	D3D12_RECT GetScissorRect() { return scissorRect; }
 
 	ID3D12GraphicsCommandList* GetCommandList() { return commandList_.Get(); }
+
+	size_t GetBackBufferCount() { return backBuffers_.size(); }
 
 private: // メンバ変数
 

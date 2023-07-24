@@ -4,6 +4,7 @@
 #include "Triangle.h"
 #include "GameScene.h"
 #include "SafeDelete.h"
+#include "ImGuiManager.h"
 
 // Windowsアプリでのエントリーポイント(main関数)
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
@@ -25,6 +26,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	// DirectXの初期化
 	dxCommon->Initialize(winApp);
 
+	// ImGuiの初期化
+	ImGuiManager* imguiManager = ImGuiManager::GetImstance();
+	imguiManager->Intialize(winApp, dxCommon);
+
 	// スプライトクラスの静的初期化
 	Triangle::StaticInitialize(dxCommon->GetDevice());
 
@@ -42,16 +47,24 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		}
 		else {
 
-			// ゲーム固有の処理
+			// ImGui受付開始
+			imguiManager->Begin();
 
+			// ゲーム固有の処理
 			// ゲームシーンの更新処理
 			gameScene->Update();
+
+			// ImGui受付終了
+			imguiManager->End();
 
 			// 描画開始
 			dxCommon->PreDraw();
 
 			// ゲームシーンの描画
 			gameScene->Draw();
+
+			// ImGui描画
+			imguiManager->Draw();
 
 			// 描画終了
 			dxCommon->PostDraw();
@@ -61,6 +74,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	// 解放を行う
 	SafeDelete(gameScene);
+
+	// ImGui解放
+	imguiManager->Finalize();
 
 	// ゲームウィンドウを閉じる
 	winApp->TerminateGameWindow();

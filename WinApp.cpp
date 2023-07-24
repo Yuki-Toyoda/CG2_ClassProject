@@ -23,7 +23,6 @@ WinApp* WinApp::GetInstance() {
 /// <param name="lparam">メッセージ番号2</param>
 /// <returns>成否</returns>
 LRESULT WinApp::WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
-
 	// メッセージに応じてゲーム固有の処理を行う
 	switch (msg)
 	{
