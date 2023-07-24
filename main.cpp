@@ -1,7 +1,7 @@
 #include <Windows.h>
 #include "WinApp.h"
 #include "DirectXCommon.h"
-#include "Sprite.h"
+#include "Triangle.h"
 #include "GameScene.h"
 #include "SafeDelete.h"
 
@@ -26,7 +26,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	dxCommon->Initialize(winApp);
 
 	// スプライトクラスの静的初期化
-	Sprite::StaticInitialize(dxCommon->GetDevice());
+	Triangle::StaticInitialize(dxCommon->GetDevice());
 
 	// ゲームシーン初期化
 	gameScene = new GameScene();

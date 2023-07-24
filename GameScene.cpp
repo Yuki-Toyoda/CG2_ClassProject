@@ -20,7 +20,7 @@ void GameScene::Initialize() {
 	dxCommon_ = DirectXCommon::GetInstance();
 
 	// スプライトの初期化
-	sprite_ = Sprite::Create({ 0.0f, 0.0f }, { 1.0f, 0.0f, 0.0f, 1.0f }, { 0.0f, 0.0f });
+	sprite_ = Triangle::Create({ 0.0f, 0.0f, 0.0f }, { 1.0f, 1.0f }, { 1.0f, 0.0f, 0.0f, 1.0f }, { 0.5f, 0.5f });
 
 	// カメラ初期化
 	cameraMatrix_ = MyMath::MakeAffineMatrix(scale_, rotate_, translate_);
@@ -34,6 +34,16 @@ void GameScene::Initialize() {
 /// </summary>
 void GameScene::Update() {
 
+	rotation.y += 0.01f;
+
+	sprite_->SetRotation(rotation);
+
+	// カメラ更新
+	cameraMatrix_ = MyMath::MakeAffineMatrix(scale_, rotate_, translate_);
+	viewMatrix_ = MyMath::Inverse(cameraMatrix_);
+	projectionMatrix_ = MyMath::MakePerspectiveFovMatrix(0.45f, float(WinApp::kWindowWidth) / float(WinApp::kwindowHeight), 0.1f, 100.0f);
+	viewProjectionMatrix_ = MyMath::Multiply(viewMatrix_, projectionMatrix_);
+
 }
 
 void GameScene::Draw() {
@@ -42,12 +52,12 @@ void GameScene::Draw() {
 	ID3D12GraphicsCommandList* commandList = dxCommon_->GetCommandList();
 
 	// スプライト描画前処理
-	Sprite::PreDraw(commandList);
+	Triangle::PreDraw(commandList);
 
 	// スプライト描画
 	sprite_->Draw(viewProjectionMatrix_);
 
 	// スプライト描画後処理
-	Sprite::PostDraw();
+	Triangle::PostDraw();
 
 }
