@@ -15,15 +15,7 @@ class DirectXCommon;
 /// ImGui関連のマネージャー
 /// </summary>
 class ImGuiManager{
-private:
-
-	// コンストラクタと代入演算子無効
-	ImGuiManager() = default;
-	~ImGuiManager() = default;
-	ImGuiManager(const ImGuiManager&) = delete;
-	const ImGuiManager& operator=(const ImGuiManager&) = delete;
-
-public:
+public: // メンバ関数
 
 	/// <summary>
 	/// インスタンス取得関数
@@ -57,7 +49,15 @@ public:
 	/// </summary>
 	void Draw();
 
-private:
+private: // コンストラクタ等
+
+	// コンストラクタと代入演算子無効
+	ImGuiManager() = default;
+	~ImGuiManager() = default;
+	ImGuiManager(const ImGuiManager&) = delete;
+	const ImGuiManager& operator=(const ImGuiManager&) = delete;
+
+private: // メンバ変数
 #ifdef _DEBUG
 	// DirectX基盤インスタンス（借りてくる）
 	DirectXCommon* dxCommon_ = nullptr;
