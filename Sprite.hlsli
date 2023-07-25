@@ -9,11 +9,13 @@ cbuffer constBuffer : register(b0)
 struct VertexShaderOutput
 {
     float4 position : SV_POSITION;
+    float2 texcoord : TEXCOORD0;
 };
 // 頂点シェーダ入力用
 struct VertexShaderInput
 {
     float4 position : POSITION0;
+    float2 texcoord : TEXCOORD0;
 };
 
 // マテリアル

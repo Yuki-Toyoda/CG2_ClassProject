@@ -33,6 +33,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	// テクスチャマネージャ初期化
 	TextureManager::GetInstance()->Intialize(dxCommon->GetDevice());
+	TextureManager::Load("white1x1.png");
 
 	// スプライトクラスの静的初期化
 	Triangle::StaticInitialize(dxCommon->GetDevice());

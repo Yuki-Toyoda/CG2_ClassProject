@@ -38,12 +38,13 @@ public: // 静的メンバ関数
 	/// <summary>
 	/// スプライト生成関数
 	/// </summary>
+	/// <param name="textureHandle">テクスチャ</param>
 	/// <param name="position">座標</param>
 	/// <param name="color">色</param>
 	/// <param name="anchorPoint">アンカーポイント</param>
 	/// <returns>生成されたスプライト</returns>
 	static Triangle* Create(
-		Vector3 position, Vector2 size = {1.0f, 1.0f}, Vector4 color = {1,1,1,1},
+		uint32_t textureHandle, Vector3 position, Vector4 color = {1,1,1,1},
 		Vector2 anchorPoint = { 0.0f, 0.0f }
 	);
 
@@ -106,7 +107,7 @@ public: // メンバ関数
 	/// <summary>
 	/// コンストラクタ
 	/// </summary>
-	Triangle(Vector3 position, Vector2 size,
+	Triangle(uint32_t textureHandle, Vector3 position, Vector2 size,
 		Vector4 color, Vector2 anchorPoint);
 
 	/// <summary>
@@ -149,6 +150,23 @@ public: // メンバ関数
 	/// <returns></returns>
 	Vector3 GetRotation() { return transform_.rotate; }
 
+	/// <summary>
+	/// サイズのセッター
+	/// </summary>
+	/// <param name="size">設定するサイズ</param>
+	void SetSize(const Vector2& size) {
+		transform_.scale.x = size.x;
+		transform_.scale.y = size.y;
+		TransferVertices();
+	}
+	/// <summary>
+	/// サイズのゲッター
+	/// </summary>
+	/// <returns>サイズ</returns>
+	Vector3 GetSize() {
+		return transform_.scale;
+	}
+
 private: // メンバ変数
 
 	// 頂点バッファ
@@ -175,6 +193,16 @@ private: // メンバ変数
 	// ワールド行列
 	Matrix4x4 matWorld_{};
 	
+	// テクスチャ
+	uint32_t textureHandle_ = 0u;
+	// テクスチャ始点
+	Vector2 texBase_ = { 0.0f, 0.0f };
+	// テクスチャ幅と高さ
+	Vector2 texSize_ = { 100.0f, 100.0f };
+
+	// リソース設定
+	D3D12_RESOURCE_DESC resourceDesc_;
+
 	// 色
 	Vector4 color_ = { 1.0f, 1.0f, 1.0f, 1.0f };
 

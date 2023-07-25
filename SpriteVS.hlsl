@@ -6,6 +6,7 @@ VertexShaderOutput main(VertexShaderInput input)
     VertexShaderOutput output;
     // “ü—Í‚ğ‚»‚Ì‚Ü‚Üo—Í‚·‚é
     output.position = mul(input.position, mat);
+    output.texcoord = input.texcoord;
     // o—Í‚·‚é
     return output;
 }

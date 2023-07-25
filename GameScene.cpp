@@ -1,4 +1,5 @@
 #include "GameScene.h"
+#include "TextureManager.h"
 #include "cassert"
 
 /// <summary>
@@ -19,9 +20,12 @@ void GameScene::Initialize() {
 	// DirectX汎用クラスのインスタンスを取得
 	dxCommon_ = DirectXCommon::GetInstance();
 
-	// スプライトの初期化
-	sprite_ = Triangle::Create({ 0.0f, 0.0f, 0.0f }, { 1.0f, 1.0f }, { 1.0f, 0.0f, 0.0f, 1.0f }, { 0.5f, 0.5f });
+	// テクスチャ読み込み
+	textureHandle_ = TextureManager::Load("uvChecker.png");
 
+	// スプライトの初期化
+	sprite_ = Triangle::Create(textureHandle_, { 0.0f, 0.0f, 0.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 0.5f, 0.5f });
+	sprite_->SetSize({1.0f, 1.0f});
 	// カメラ初期化
 	cameraMatrix_ = MyMath::MakeAffineMatrix(scale_, rotate_, translate_);
 	viewMatrix_ = MyMath::Inverse(cameraMatrix_);

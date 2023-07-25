@@ -8,6 +8,7 @@
 /// </summary>
 struct VertexData {
 	Vector4 position;
+	Vector2 uv;
 };
 
 /// <summary>
