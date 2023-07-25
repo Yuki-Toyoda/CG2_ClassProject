@@ -59,6 +59,7 @@ private: // メンバ変数
 
 	// スプライト
 	Triangle* sprite_ = nullptr;
+	Triangle* triangle = nullptr;
 	uint32_t textureHandle_ = 0u;
 
 	Vector3 rotation = { 0.0f, 0.0f, 0.0f };

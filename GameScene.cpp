@@ -26,6 +26,8 @@ void GameScene::Initialize() {
 	// スプライトの初期化
 	sprite_ = Triangle::Create(textureHandle_, { 0.0f, 0.0f, 0.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 0.5f, 0.5f });
 	sprite_->SetSize({1.0f, 1.0f});
+	triangle = Triangle::Create(textureHandle_, { 0.0f, 0.0f, 0.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 0.5f, 0.5f });
+	triangle->SetSize({ 1.0f, 0.5f });
 	// カメラ初期化
 	cameraMatrix_ = MyMath::MakeAffineMatrix(scale_, rotate_, translate_);
 	viewMatrix_ = MyMath::Inverse(cameraMatrix_);
@@ -66,6 +68,7 @@ void GameScene::Draw() {
 
 	// スプライト描画
 	sprite_->Draw(viewProjectionMatrix_);
+	triangle->Draw(viewProjectionMatrix_);
 
 	// スプライト描画後処理
 	Triangle::PostDraw();
