@@ -3,6 +3,7 @@
 #include "DirectXCommon.h"
 #include "Triangle.h"
 #include "GameScene.h"
+#include "TextureManager.h"
 #include "SafeDelete.h"
 #include "ImGuiManager.h"
 
@@ -29,6 +30,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	// ImGuiの初期化
 	ImGuiManager* imguiManager = ImGuiManager::GetImstance();
 	imguiManager->Intialize(winApp, dxCommon);
+
+	// テクスチャマネージャ初期化
+	TextureManager::GetInstance()->Intialize(dxCommon->GetDevice());
 
 	// スプライトクラスの静的初期化
 	Triangle::StaticInitialize(dxCommon->GetDevice());
