@@ -50,9 +50,9 @@ public: // メンバ関数
 	void ClearRenderTarget();
 
 	/// <summary>
-	/// 深度バッファ生成関数
+	/// 深度バッファをクリアする関数
 	/// </summary>
-	void CreateDepthBuffer();
+	void ClearDepthBuffer();
 
 	/// <summary>
 	/// デバイスの取得関数
@@ -156,6 +156,11 @@ private: // メンバ関数
 	/// レンダーターゲット生成関数
 	/// </summary>
 	void CreateFinalRenderTargets();
+
+	/// <summary>
+	/// 深度バッファ生成関数
+	/// </summary>
+	void CreateDepthBuffer();
 
 	/// <summary>
 	/// フェンス生成関数

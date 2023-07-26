@@ -130,6 +130,15 @@ void Triangle::StaticInitialize(
 	// 三角形の中を塗りつぶす
 	rasterrizerDesc.FillMode = D3D12_FILL_MODE_SOLID;
 
+	// デプスステンシルビューの設定を行う
+	D3D12_DEPTH_STENCIL_DESC depthStencilDesc{};
+	// 深度の機能を有効
+	depthStencilDesc.DepthEnable = true;
+	// 書き込む
+	depthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
+	// 比較関数はlessEqual 近ければ描画
+	depthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
+
 	// 頂点シェーダ用のバイナリオブジェクト
 	ComPtr<IDxcBlob> vertexBlob;
 	// ピクセルシェーダ用のバイナリオブジェクト
@@ -155,7 +164,10 @@ void Triangle::StaticInitialize(
 	// ブレンドステート
 	graphicsPipelineStateDesc.BlendState = blendDesc;
 	// ラスタライザステート
-	graphicsPipelineStateDesc.RasterizerState = rasterrizerDesc;
+	graphicsPipelineStateDesc.RasterizerState = rasterrizerDesc;	
+	// デプスステンシルビュー
+	graphicsPipelineStateDesc.DSVFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	graphicsPipelineStateDesc.DepthStencilState = depthStencilDesc;
 	
 	// 書き込むRTVの情報
 	graphicsPipelineStateDesc.NumRenderTargets = 1;
