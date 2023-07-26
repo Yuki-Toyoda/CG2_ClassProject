@@ -50,23 +50,32 @@ public: // メンバ関数
 	void ClearRenderTarget();
 
 	/// <summary>
+	/// 深度バッファ生成関数
+	/// </summary>
+	void CreateDepthBuffer();
+
+	/// <summary>
 	/// デバイスの取得関数
 	/// </summary>
 	/// <returns>デバイス</returns>
 	ID3D12Device* GetDevice() { return device_.Get(); }
 
+	/// <summary>
+	/// スワップチューンのゲッター
+	/// </summary>
+	/// <returns>スワップチューン</returns>
 	IDXGISwapChain4* GetSwapChain() { return swapChain_.Get(); }
 
 	/// <summary>
-	/// 
+	/// コマンドリストのゲッター
 	/// </summary>
-	/// <returns></returns>
-	D3D12_VIEWPORT GetViewPort() { return viewport; }
-
-	D3D12_RECT GetScissorRect() { return scissorRect; }
-
+	/// <returns>コマンドリスト</returns>
 	ID3D12GraphicsCommandList* GetCommandList() { return commandList_.Get(); }
 
+	/// <summary>
+	/// バックバッファの数のゲッター
+	/// </summary>
+	/// <returns>バックバッファ数</returns>
 	size_t GetBackBufferCount() { return backBuffers_.size(); }
 
 private: // メンバ変数
@@ -82,7 +91,9 @@ private: // メンバ変数
 	Microsoft::WRL::ComPtr<ID3D12CommandQueue> commandQueue_;		  // コマンドキュー
 	Microsoft::WRL::ComPtr<IDXGISwapChain4> swapChain_;				  // スワップチューン
 	std::vector<Microsoft::WRL::ComPtr<ID3D12Resource>> backBuffers_; // バックバッファ
+	Microsoft::WRL::ComPtr<ID3D12Resource> depthBuffer_;			  // 深度バッファ
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> rtvHeap_;			  // RTVヒープ
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> dsvHeap_;			  // DSVヒープ
 	Microsoft::WRL::ComPtr<ID3D12Fence> fence_;						  // フェンス
 	UINT64 fenceVal_ = 0;											  // フェンスの値
 	int32_t backBufferWidth_ = 0;									  // ウィンドウ横幅

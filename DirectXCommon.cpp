@@ -41,6 +41,8 @@ void DirectXCommon::Initialize(WinApp* win,
 	CreateSwapChain();
 	// レンダーターゲット生成
 	CreateFinalRenderTargets();
+	// 深度バッファ生成
+	CreateDepthBuffer();
 	// フェンス生成
 	CreateFence();
 
@@ -156,6 +158,54 @@ void DirectXCommon::ClearRenderTarget() {
 	float clearColor[] = { 0.1f, 0.25f, 0.5f, 0.0f };
 	commandList_->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
 
+}
+
+void DirectXCommon::CreateDepthBuffer()
+{
+	// 結果確認用
+	HRESULT result = S_FALSE;
+
+	// ヒーププロパティの設定
+	D3D12_HEAP_PROPERTIES heapProperties{};
+	heapProperties.Type = D3D12_HEAP_TYPE_DEFAULT;
+
+	// リソースの設定
+	D3D12_RESOURCE_DESC depthResourceDesc{};
+
+	depthResourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
+	depthResourceDesc.Width = backBufferWidth_; // リソースのサイズ　
+	depthResourceDesc.Height = backBufferHeight_; // リソースのサイズ　
+	depthResourceDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;
+	depthResourceDesc.Format = DXGI_FORMAT_D32_FLOAT;
+
+	depthResourceDesc.DepthOrArraySize = 1;
+	depthResourceDesc.MipLevels = 1;
+	depthResourceDesc.SampleDesc.Count = 1;
+
+	D3D12_CLEAR_VALUE depthClearValue{};
+	depthClearValue.DepthStencil.Depth = 1.0f;
+	depthClearValue.Format = DXGI_FORMAT_D32_FLOAT;
+
+	// 深度バッファリソース生成
+	result = device_->CreateCommittedResource(&heapProperties, D3D12_HEAP_FLAG_NONE,
+		&depthResourceDesc, D3D12_RESOURCE_STATE_DEPTH_WRITE, &depthClearValue,
+		IID_PPV_ARGS(&depthBuffer_));
+	// 生成出来たか確認
+	assert(SUCCEEDED(result));
+
+	// 深度ビュー用デスクリプタヒープ作成
+	D3D12_DESCRIPTOR_HEAP_DESC dsvHeapDesc{};
+	dsvHeapDesc.NumDescriptors = 1;                    // 深度ビューは1つ
+	dsvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_DSV; // デプスステンシルビュー
+	result = device_->CreateDescriptorHeap(&dsvHeapDesc, IID_PPV_ARGS(&dsvHeap_));
+	assert(SUCCEEDED(result));
+
+	// 深度ビュー作成
+	D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc = {};
+	dsvDesc.Format = DXGI_FORMAT_D32_FLOAT; // 深度値フォーマット
+	dsvDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
+	device_->CreateDepthStencilView(
+		depthBuffer_.Get(), &dsvDesc, dsvHeap_->GetCPUDescriptorHandleForHeapStart());
 }
 
 /// <summary>
