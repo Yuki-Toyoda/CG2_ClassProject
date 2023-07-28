@@ -78,6 +78,9 @@
     <ClCompile Include="Sprite.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="Sphere.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Debug.h">
@@ -149,13 +152,19 @@
     <ClInclude Include="Sprite.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="Sphere.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="SpritePS.hlsl" />
     <FxCompile Include="SpriteVS.hlsl" />
+    <FxCompile Include="Object3D.VS.hlsl" />
+    <FxCompile Include="Object3D.PS.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Sprite.hlsli" />
+    <None Include="Object3D.hlsli" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="externals\imgui\LICENSE.txt">

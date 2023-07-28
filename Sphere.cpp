@@ -1,4 +1,4 @@
-#include "Sprite.h"
+#include "Sphere.h"
 #include <cassert>
 #include <d3dcompiler.h>
 #include "TextureManager.h"
@@ -9,27 +9,33 @@ using namespace Microsoft::WRL;
 
 // 静的なメンバ変数の実体を宣言する
 
+// 定数宣言
+const uint32_t Sphere::kSubdivison = 16;												// 分割数
+const float Sphere::kLonEvery = 2.0f * float(std::numbers::pi) / float(kSubdivison);	// 経度1つ分の分割角度
+const float Sphere::kLatEvery = float(std::numbers::pi) / float(kSubdivison);			// 経度1つ分の分割角度
+const uint32_t Sphere::kVertexIndex = kSubdivison * kSubdivison * 6;					// 頂点数
+
 // デバイス
-ID3D12Device* Sprite::sDevice_ = nullptr;
+ID3D12Device* Sphere::sDevice_ = nullptr;
 
 // コマンドリスト
-ID3D12GraphicsCommandList* Sprite::sCommandList_ = nullptr;
+ID3D12GraphicsCommandList* Sphere::sCommandList_ = nullptr;
 // ルートシグネチャ
-ComPtr<ID3D12RootSignature> Sprite::sRootSignature_;
+ComPtr<ID3D12RootSignature> Sphere::sRootSignature_;
 // パイプラインステートオブジェクト
-ComPtr<ID3D12PipelineState> Sprite::sPipelineStates_;
+ComPtr<ID3D12PipelineState> Sphere::sPipelineStates_;
 
 // dxcUtils
-ComPtr<IDxcUtils> Sprite::dxcUtils_ = nullptr;
+ComPtr<IDxcUtils> Sphere::dxcUtils_ = nullptr;
 // dxcコンパイラ
-ComPtr<IDxcCompiler3> Sprite::dxcCompiler_ = nullptr;
+ComPtr<IDxcCompiler3> Sphere::dxcCompiler_ = nullptr;
 // InludeHandler
-ComPtr<IDxcIncludeHandler> Sprite::dxcIncludeHandler_ = nullptr;
+ComPtr<IDxcIncludeHandler> Sphere::dxcIncludeHandler_ = nullptr;
 
 // 正射影行列
-Matrix4x4 Sprite::sMatProjection_;
+Matrix4x4 Sphere::sMatProjection_;
 
-void Sprite::StaticInitialize(ID3D12Device* device)
+void Sphere::StaticInitialize(ID3D12Device* device)
 {
 	// 引数のNULLチェック
 	assert(device);
@@ -143,11 +149,11 @@ void Sprite::StaticInitialize(ID3D12Device* device)
 	ComPtr<IDxcBlob> pixelBlob;
 
 	// 頂点シェーダをコンパイルする
-	vertexBlob = CompileShader(L"SpriteVS.hlsl", L"vs_6_0");
+	vertexBlob = CompileShader(L"Object3D.VS.hlsl", L"vs_6_0");
 	// コンパイル出来たか確認する
 	assert(vertexBlob != nullptr);
 	// ピクセルシェーダをコンパイルする
-	pixelBlob = CompileShader(L"SpritePS.hlsl", L"ps_6_0");
+	pixelBlob = CompileShader(L"Object3D.PS.hlsl", L"ps_6_0");
 	// コンパイル出来たか確認する
 	assert(pixelBlob != nullptr);
 
@@ -186,11 +192,10 @@ void Sprite::StaticInitialize(ID3D12Device* device)
 	assert(SUCCEEDED(result));
 }
 
-void Sprite::PreDraw(ID3D12GraphicsCommandList* cmdList)
+void Sphere::PreDraw(ID3D12GraphicsCommandList* cmdList)
 {
-
 	// PreDrawとPostDrawがペアで呼ばれていない場合はエラー
-	assert(Sprite::sCommandList_ == nullptr);
+	assert(Sphere::sCommandList_ == nullptr);
 
 	// コマンドリストをセットする
 	sCommandList_ = cmdList;
@@ -205,51 +210,40 @@ void Sprite::PreDraw(ID3D12GraphicsCommandList* cmdList)
 	// ルートシグネチャの設定
 	sCommandList_->SetGraphicsRootSignature(sRootSignature_.Get());
 	// プリミティブ形状の設定を行う
-	sCommandList_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
-
+	sCommandList_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }
 
-void Sprite::PostDraw()
+void Sphere::PostDraw()
 {
 	// 取得したコマンドリストを削除する
-	Sprite::sCommandList_ = nullptr;
+	Sphere::sCommandList_ = nullptr;
 }
 
-Sprite* Sprite::Create(uint32_t textureHandle, Vector3 position, Vector4 color, Vector2 anchorPoint)
+Sphere* Sphere::Create(uint32_t textureHandle, Vector3 position, float radius, Vector4 color)
 {
-	// 仮サイズ設定
-	Vector2 size = { 100.0f, 100.0f };
-
-	// テクスチャの情報を取得
-	const D3D12_RESOURCE_DESC& resDesc =
-		TextureManager::GetInstance()->GetResourceDesc(textureHandle);
-	// 三角形のサイズをテクスチャサイズに設定
-	size = { (float)resDesc.Width, (float)resDesc.Height };
-
 	// スプライトのインスタンスを生成する
-	Sprite* sprite =
-		new Sprite(textureHandle, position, size, color, anchorPoint);
+	Sphere* sphere =
+		new Sphere(textureHandle, position, radius, color);
 	// スプライトの中身がnullならnullを返す
-	if (sprite == nullptr) {
+	if (sphere == nullptr) {
 		return nullptr;
 	}
 
 	// 初期化
-	if (!sprite->Initialize()) {
+	if (!sphere->Initialize()) {
 		// 作成したスプライトを削除する
-		delete sprite;
+		delete sphere;
 		assert(0);
 		// nullを返す
 		return nullptr;
 	}
 
 	// スプライトを返す
-	return sprite;
+	return sphere;
 }
 
-void Sprite::InitializeDXC()
+void Sphere::InitializeDXC()
 {
-
 	// 結果確認用
 	HRESULT result = S_FALSE;
 
@@ -267,10 +261,9 @@ void Sprite::InitializeDXC()
 	result = dxcUtils_->CreateDefaultIncludeHandler(&dxcIncludeHandler_);
 	// 設定を行えたか確認する
 	assert(SUCCEEDED(result));
-
 }
 
-IDxcBlob* Sprite::CompileShader(const std::wstring& filePath, const wchar_t* profile)
+IDxcBlob* Sphere::CompileShader(const std::wstring& filePath, const wchar_t* profile)
 {
 	// 結果確認用
 	HRESULT result = S_FALSE;
@@ -341,7 +334,7 @@ IDxcBlob* Sprite::CompileShader(const std::wstring& filePath, const wchar_t* pro
 	return shaderBlob;
 }
 
-Microsoft::WRL::ComPtr<ID3D12Resource> Sprite::CreateBufferResource(ID3D12Device* device, size_t sizeInBytes)
+Microsoft::WRL::ComPtr<ID3D12Resource> Sphere::CreateBufferResource(ID3D12Device* device, size_t sizeInBytes)
 {
 	// 結果確認用
 	HRESULT result = S_FALSE;
@@ -375,22 +368,22 @@ Microsoft::WRL::ComPtr<ID3D12Resource> Sprite::CreateBufferResource(ID3D12Device
 	return vertexResource;
 }
 
-Sprite::Sprite(){}
+Sphere::Sphere(){}
 
-Sprite::Sprite(uint32_t textureHandle, Vector3 position, Vector2 size, Vector4 color, Vector2 anchorPoint)
+Sphere::Sphere(uint32_t textureHandle, Vector3 position, float radius, Vector4 color)
 {
+	radius;
 	// 引数の値をメンバ変数に代入する
 	transform_.translate = position;
-	transform_.scale.x = size.x;
-	transform_.scale.y = size.y;
-	anchorPoint_ = anchorPoint;
+	transform_.scale.x = radius;
+	transform_.scale.y = radius;
+	transform_.scale.z = radius;
 	matWorld_ = MyMath::MakeIdentity4x4();
 	color_ = color;
 	textureHandle_ = textureHandle;
-	texSize_ = size;
 }
 
-bool Sprite::Initialize()
+bool Sphere::Initialize()
 {
 	// NULLチェック
 	assert(sDevice_);
@@ -402,7 +395,7 @@ bool Sprite::Initialize()
 	resourceDesc_ = TextureManager::GetInstance()->GetResourceDesc(textureHandle_);
 
 	// 頂点バッファリソース生成
-	vertBuff_ = CreateBufferResource(sDevice_, sizeof(VertexData) * kVertexNum);
+	vertBuff_ = CreateBufferResource(sDevice_, sizeof(VertexData) * kVertexIndex);
 	// 頂点バッファのマッピングを行う
 	result = vertBuff_->Map(0, nullptr, reinterpret_cast<void**>(&vertMap_));
 	// マッピング出来ているかを確認する
@@ -414,7 +407,7 @@ bool Sprite::Initialize()
 	// リソースの先頭のアドレスから使う
 	vbView_.BufferLocation = vertBuff_->GetGPUVirtualAddress();
 	// 使用するリソースのサイズを設定する
-	vbView_.SizeInBytes = sizeof(VertexData) * kVertexNum;
+	vbView_.SizeInBytes = sizeof(VertexData) * kVertexIndex;
 	// 1頂点アドレスを設定する
 	vbView_.StrideInBytes = sizeof(VertexData);
 
@@ -429,7 +422,7 @@ bool Sprite::Initialize()
 	return true;
 }
 
-void Sprite::Draw(Matrix4x4 vpMatrix)
+void Sphere::Draw(Matrix4x4 vpMatrix)
 {
 	// 行列変換
 	Matrix4x4 worldMatrix = MyMath::MakeAffineMatrix(transform_.scale, transform_.rotate, transform_.translate);
@@ -449,44 +442,69 @@ void Sprite::Draw(Matrix4x4 vpMatrix)
 	TextureManager::GetInstance()->SetGraphicsDescriptorTable(sCommandList_, 1, textureHandle_);
 
 	// 描画コマンド
-	sCommandList_->DrawInstanced(kVertexNum, 1, 0, 0);
+	sCommandList_->DrawInstanced(kVertexIndex, 1, 0, 0);
+
 }
 
-void Sprite::TransferVertices()
+void Sphere::TransferVertices()
 {
-	// 頂点
-	enum {
-		LB, // 左下
-		LT, // 左上
-		RB, // 右下
-		RT	// 右上
-	};
-
-	// 4頂点の座標を設定
-	float left = (0.0f - anchorPoint_.x) * transform_.scale.x;
-	float right = (1.0f - anchorPoint_.x) * transform_.scale.x;
-	float top = (1.0f - anchorPoint_.y) * transform_.scale.y;
-	float bottom = (0.0f - anchorPoint_.y) * transform_.scale.y;
-
 	// 頂点データ
-	VertexData vertices[kVertexNum];
+	VertexData vertices[kVertexIndex];
 
-	vertices[LB].position = { left, bottom, 0.0f, 1.0f };  // 左下
-	vertices[LT].position = { left, top, 0.0f, 1.0f };     // 左上
-	vertices[RB].position = { right, bottom, 0.0f, 1.0f }; // 右下
-	vertices[RT].position = { right, top, 0.0f, 1.0f };    // 右上
+	const float dTheta = (float)std::numbers::pi / kSubdivison;
+	const float dPhi = 2 * (float)std::numbers::pi / kSubdivison;
+	// 緯度の方向に分割 -π / 2 ～ π / 2
+	for (uint32_t latIndex = 0; latIndex < kSubdivison; latIndex++) {
+		// 現在の緯度
+		float lat = -(float)std::numbers::pi / 2.0f + kLatEvery * latIndex;
+		// 経度の方向に分割 0 ～ 2 π
+		for (uint32_t lonIndex = 0; lonIndex < kSubdivison; lonIndex++) {
+			// 現在の経度
+			float lon = lonIndex * kLonEvery;
+			// world 座標系での a, b, c を求める
+			Vector4 pA, pB, pC, pD;
+			// texcoord
+			Vector2 tA, tB, tC, tD;
+			tA.x = float(lonIndex) / float(kSubdivison);
+			tA.y = 1.0f - float(latIndex) / float(kSubdivison);
+			tB.x = float(lonIndex) / float(kSubdivison);
+			tB.y = 1.0f - float(latIndex + 1) / float(kSubdivison);
+			tC.x = float(lonIndex + 1) / float(kSubdivison);
+			tC.y = 1.0f - float(latIndex) / float(kSubdivison);
+			tD.x = float(lonIndex + 1) / float(kSubdivison);
+			tD.y = 1.0f - float(latIndex + 1) / float(kSubdivison);
+			// a, b, c を Screen 座標系まで変換
+			pA = { cosf(lat) * cosf(lon),sinf(lat),cosf(lat) * sinf(lon),1.0f };
+			pB = { cosf(lat + dTheta) * cosf(lon),sinf(lat + dTheta),cosf(lat + dTheta) * sinf(lon) ,1.0f };
+			pC = { cosf(lat) * cosf(lon + dPhi),sinf(lat),cosf(lat) * sinf(lon + dPhi) ,1.0f };
+			pD = { cosf(lat + dTheta) * cosf(lon + dPhi),sinf(lat + dTheta),cosf(lat + dTheta) * sinf(lon + dPhi) ,1.0f };
 
+			uint32_t startIndex = (latIndex * kSubdivison + lonIndex) * 6;
 
-	float tex_left = texBase_.x / resourceDesc_.Width;
-	float tex_right = (texBase_.x + texSize_.x) / resourceDesc_.Width;
-	float tex_top = texBase_.y / resourceDesc_.Height;
-	float tex_bottom = (texBase_.y + texSize_.y) / resourceDesc_.Height;
+			vertices[startIndex].position = pA;
+			vertices[startIndex].uv = tA;
 
-	vertices[LB].uv = { tex_left, tex_bottom };  // 左下
-	vertices[LT].uv = { tex_left, tex_top };     // 左上
-	vertices[RB].uv = { tex_right, tex_bottom }; // 右下
-	vertices[RT].uv = { tex_right, tex_top };    // 右上
+			vertices[startIndex + 1].position = pB;
+			vertices[startIndex + 1].uv = tB;
+
+			vertices[startIndex + 2].position = pC;
+			vertices[startIndex + 2].uv = tC;
+
+			vertices[startIndex + 3].position = pC;
+			vertices[startIndex + 3].uv = tC;
+
+			vertices[startIndex + 4].position = pB;
+			vertices[startIndex + 4].uv = tB;
+
+			vertices[startIndex + 5].position = pD;
+			vertices[startIndex + 5].uv = tD;
+
+		}
+	}
 
 	// 頂点バッファへのデータ転送
 	memcpy(vertMap_, vertices, sizeof(vertices));
+
 }
+
+

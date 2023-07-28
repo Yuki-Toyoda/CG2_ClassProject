@@ -2,6 +2,8 @@
 #include "WinApp.h"
 #include "DirectXCommon.h"
 #include "Triangle.h"
+#include "Sprite.h"
+#include "Sphere.h"
 #include "GameScene.h"
 #include "TextureManager.h"
 #include "SafeDelete.h"
@@ -39,6 +41,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	Triangle::StaticInitialize(dxCommon->GetDevice());
 	// スプライトクラスの静的初期化
 	Sprite::StaticInitialize(dxCommon->GetDevice());
+	// 球クラスの静的初期化
+	Sphere::StaticInitialize(dxCommon->GetDevice());
 
 	// ゲームシーン初期化
 	gameScene = new GameScene();

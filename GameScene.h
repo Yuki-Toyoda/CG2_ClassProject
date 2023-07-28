@@ -2,6 +2,7 @@
 #include "DirectXCommon.h"
 #include "Triangle.h"
 #include "Sprite.h"
+#include "Sphere.h"
 
 #include "externals/imgui/imgui.h"
 
@@ -64,6 +65,9 @@ private: // メンバ変数
 
 	// スプライト
 	Sprite* sprite_ = nullptr;
+
+	// 球
+	Sphere* sphere_ = nullptr;
 
 	// テクスチャ
 	uint32_t textureHandle_ = 0u;

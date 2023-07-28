@@ -1,4 +1,5 @@
 #pragma once
+#include <vector>
 #include "Vector3.h"
 #include "Vector4.h"
 #include "Matrix4x4.h"
@@ -20,9 +21,16 @@ struct MaterialData {
 };
 
 /// <summary>
+/// モデルデータ構造体
+/// </summary>
+struct ModelData {
+	std::vector<VertexData> vertices;
+};
+
+/// <summary>
 /// 球構造体
 /// </summary>
-struct Sphere {
+struct MySphere {
 	Vector3 center; // 中心座標
 	float radius; // 半径	
 };
