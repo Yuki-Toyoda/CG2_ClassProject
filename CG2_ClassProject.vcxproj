@@ -158,6 +158,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="externals\imgui\imgui_widgets.cpp" />
     <ClCompile Include="GameScene.cpp" />
     <ClCompile Include="ImGuiManager.cpp" />
+    <ClCompile Include="LightGroup.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MyMath.cpp" />
     <ClCompile Include="Sphere.cpp" />
@@ -168,6 +169,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Debug.h" />
+    <ClInclude Include="DirectionalLight.h" />
     <ClInclude Include="DirectXCommon.h" />
     <ClInclude Include="externals\imgui\imconfig.h" />
     <ClInclude Include="externals\imgui\imgui.h" />
@@ -179,6 +181,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="externals\imgui\imstb_truetype.h" />
     <ClInclude Include="GameScene.h" />
     <ClInclude Include="ImGuiManager.h" />
+    <ClInclude Include="LightGroup.h" />
     <ClInclude Include="Matrix4x4.h" />
     <ClInclude Include="MyMath.h" />
     <ClInclude Include="MyStruct.h" />

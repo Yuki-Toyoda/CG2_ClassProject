@@ -1,5 +1,6 @@
 #pragma once
 #include "DirectXCommon.h"
+#include "LightGroup.h"
 #include "Triangle.h"
 #include "Sprite.h"
 #include "Sphere.h"
@@ -43,6 +44,8 @@ private: // メンバ変数
 	// DirectX汎用クラス
 	DirectXCommon* dxCommon_ = nullptr;
 
+	Vector3 setRotation_ = { 0.0f, -1.0f, 0.0f };
+
 	// カメラ座標
 	Vector3 translate_ = { 0.0f, 0.0f, -10.0f };
 	// カメラ拡大率
@@ -68,6 +71,7 @@ private: // メンバ変数
 
 	// 球
 	Sphere* sphere_ = nullptr;
+	Sphere* sphere2_ = nullptr;
 
 	// テクスチャ
 	uint32_t textureHandle_ = 0u;

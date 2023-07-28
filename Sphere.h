@@ -6,6 +6,7 @@
 #include <dxcapi.h>
 #include <numbers>
 #include "DirectXCommon.h"
+#include "LightGroup.h"
 #include "MyMath.h"
 #include "MyStruct.h"
 #include "Debug.h"
@@ -15,6 +16,27 @@
 /// </summary>
 class Sphere
 {
+private: // サブクラス
+
+	/// <summary>
+	/// 頂点データ構造体
+	/// </summary>
+	struct VertexData {
+		Vector4 position;
+		Vector2 uv;
+		Vector3 normal;
+	};
+
+	/// <summary>
+	/// 定数バッファデータ構造体
+	/// </summary>
+	struct MaterialData {
+		Vector4 color;
+		Matrix4x4 mat;
+		Matrix4x4 world;
+		int32_t enableLighting;
+	};
+
 public: // 静的なメンバ関数
 
 	/// <summary>
@@ -73,6 +95,11 @@ public: // 静的なメンバ関数
 	/// <returns></returns>
 	static Microsoft::WRL::ComPtr<ID3D12Resource> CreateBufferResource(ID3D12Device* device, size_t sizeInBytes);
 
+	/// <summary>
+	/// 
+	/// </summary>
+	static void SetLightRotation(Vector3 rotation) { lightGroup_->SetDirectionalLightDirection(0, rotation); }
+
 private: // 静的なメンバ変数
 
 	// 定数宣言
@@ -100,6 +127,9 @@ private: // 静的なメンバ変数
 
 	// 正射影行列
 	static Matrix4x4 sMatProjection_;
+
+	// ライト
+	static std::unique_ptr<LightGroup> lightGroup_;
 
 public: // メンバ関数
 

@@ -11,6 +11,24 @@
 
 class Sprite
 {
+private: // サブクラス
+
+	/// <summary>
+	/// 頂点データ構造体
+	/// </summary>
+	struct VertexData {
+		Vector4 position;
+		Vector2 uv;
+	};
+
+	/// <summary>
+	/// 定数バッファデータ構造体
+	/// </summary>
+	struct MaterialData {
+		Vector4 color;
+		Matrix4x4 mat;
+	};
+
 public:// 静的なメンバ関数
 
 	/// <summary>

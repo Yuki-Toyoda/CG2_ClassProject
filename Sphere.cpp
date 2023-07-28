@@ -35,6 +35,9 @@ ComPtr<IDxcIncludeHandler> Sphere::dxcIncludeHandler_ = nullptr;
 // 正射影行列
 Matrix4x4 Sphere::sMatProjection_;
 
+// ライト
+std::unique_ptr<LightGroup> Sphere::lightGroup_;
+
 void Sphere::StaticInitialize(ID3D12Device* device)
 {
 	// 引数のNULLチェック
@@ -64,7 +67,7 @@ void Sphere::StaticInitialize(ID3D12Device* device)
 	descriptionRootSignature.Flags =
 		D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
 	// ルートパラメータを設定する
-	D3D12_ROOT_PARAMETER rootParameters[2] = {};
+	D3D12_ROOT_PARAMETER rootParameters[3] = {};
 	rootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
 	rootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 	rootParameters[0].Descriptor.ShaderRegister = 0;
@@ -72,6 +75,9 @@ void Sphere::StaticInitialize(ID3D12Device* device)
 	rootParameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 	rootParameters[1].DescriptorTable.pDescriptorRanges = descriptorRange;
 	rootParameters[1].DescriptorTable.NumDescriptorRanges = _countof(descriptorRange);
+	rootParameters[2].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+	rootParameters[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+	rootParameters[2].Descriptor.ShaderRegister = 1;
 	descriptionRootSignature.pParameters = rootParameters;
 	descriptionRootSignature.NumParameters = _countof(rootParameters);
 
@@ -108,7 +114,7 @@ void Sphere::StaticInitialize(ID3D12Device* device)
 	assert(SUCCEEDED(result));
 
 	// インプットレイアウトの設定を行う
-	D3D12_INPUT_ELEMENT_DESC inputElementDescs[2] = {};
+	D3D12_INPUT_ELEMENT_DESC inputElementDescs[3] = {};
 	inputElementDescs[0].SemanticName = "POSITION";
 	inputElementDescs[0].SemanticIndex = 0;
 	inputElementDescs[0].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;;
@@ -117,6 +123,10 @@ void Sphere::StaticInitialize(ID3D12Device* device)
 	inputElementDescs[1].SemanticIndex = 0;
 	inputElementDescs[1].Format = DXGI_FORMAT_R32G32_FLOAT;
 	inputElementDescs[1].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
+	inputElementDescs[2].SemanticName = "NORMAL";
+	inputElementDescs[2].SemanticIndex = 0;
+	inputElementDescs[2].Format = DXGI_FORMAT_R32G32B32_FLOAT;
+	inputElementDescs[2].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
 	D3D12_INPUT_LAYOUT_DESC inputLayoutDesc{};
 	graphicsPipelineStateDesc.InputLayout.pInputElementDescs = inputElementDescs;
 	graphicsPipelineStateDesc.InputLayout.NumElements = _countof(inputElementDescs);
@@ -190,6 +200,10 @@ void Sphere::StaticInitialize(ID3D12Device* device)
 		IID_PPV_ARGS(&sPipelineStates_));
 	// 生成出来ているかを確認する
 	assert(SUCCEEDED(result));
+
+	// ライト生成
+	lightGroup_.reset(LightGroup::Create());
+
 }
 
 void Sphere::PreDraw(ID3D12GraphicsCommandList* cmdList)
@@ -424,6 +438,12 @@ bool Sphere::Initialize()
 
 void Sphere::Draw(Matrix4x4 vpMatrix)
 {
+
+	lightGroup_->Update();
+
+	// ライトの描画
+	lightGroup_->Draw(sCommandList_, 2);
+
 	// 行列変換
 	Matrix4x4 worldMatrix = MyMath::MakeAffineMatrix(transform_.scale, transform_.rotate, transform_.translate);
 	matWorld_ = MyMath::Multiply(worldMatrix, vpMatrix);
@@ -432,6 +452,9 @@ void Sphere::Draw(Matrix4x4 vpMatrix)
 	constMap_->color = color_;
 	// 行列を設定
 	constMap_->mat = matWorld_;
+	constMap_->world = worldMatrix;
+	// ライティングを有効
+	constMap_->enableLighting = true;
 
 	// 頂点バッファの設定
 	sCommandList_->IASetVertexBuffers(0, 1, &vbView_);
@@ -483,21 +506,39 @@ void Sphere::TransferVertices()
 
 			vertices[startIndex].position = pA;
 			vertices[startIndex].uv = tA;
+			vertices[startIndex].normal.x = vertices[startIndex].position.x;
+			vertices[startIndex].normal.y = vertices[startIndex].position.y;
+			vertices[startIndex].normal.z = vertices[startIndex].position.z;
 
 			vertices[startIndex + 1].position = pB;
 			vertices[startIndex + 1].uv = tB;
+			vertices[startIndex + 1].normal.x = vertices[startIndex + 1].position.x;
+			vertices[startIndex + 1].normal.y = vertices[startIndex + 1].position.y;
+			vertices[startIndex + 1].normal.z = vertices[startIndex + 1].position.z;
 
 			vertices[startIndex + 2].position = pC;
 			vertices[startIndex + 2].uv = tC;
+			vertices[startIndex + 2].normal.x = vertices[startIndex + 2].position.x;
+			vertices[startIndex + 2].normal.y = vertices[startIndex + 2].position.y;
+			vertices[startIndex + 2].normal.z = vertices[startIndex + 2].position.z;
 
 			vertices[startIndex + 3].position = pC;
 			vertices[startIndex + 3].uv = tC;
+			vertices[startIndex + 3].normal.x = vertices[startIndex + 3].position.x;
+			vertices[startIndex + 3].normal.y = vertices[startIndex + 3].position.y;
+			vertices[startIndex + 3].normal.z = vertices[startIndex + 3].position.z;
 
 			vertices[startIndex + 4].position = pB;
 			vertices[startIndex + 4].uv = tB;
+			vertices[startIndex + 4].normal.x = vertices[startIndex + 4].position.x;
+			vertices[startIndex + 4].normal.y = vertices[startIndex + 4].position.y;
+			vertices[startIndex + 4].normal.z = vertices[startIndex + 4].position.z;
 
 			vertices[startIndex + 5].position = pD;
 			vertices[startIndex + 5].uv = tD;
+			vertices[startIndex + 5].normal.x = vertices[startIndex + 5].position.x;
+			vertices[startIndex + 5].normal.y = vertices[startIndex + 5].position.y;
+			vertices[startIndex + 5].normal.z = vertices[startIndex + 5].position.z;
 
 		}
 	}
