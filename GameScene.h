@@ -1,6 +1,7 @@
 #pragma once
 #include "DirectXCommon.h"
 #include "Triangle.h"
+#include "Sprite.h"
 
 #include "externals/imgui/imgui.h"
 
@@ -57,10 +58,16 @@ private: // メンバ変数
 	// ビュープロジェクション行列
 	Matrix4x4 viewProjectionMatrix_;
 
+	// 三角形
+	Triangle* triangle_ = nullptr;
+	Triangle* triangle2_ = nullptr;
+
 	// スプライト
-	Triangle* sprite_ = nullptr;
-	Triangle* triangle = nullptr;
+	Sprite* sprite_ = nullptr;
+
+	// テクスチャ
 	uint32_t textureHandle_ = 0u;
+	uint32_t textureHandle2_ = 0u;
 
 	Vector3 rotation = { 0.0f, 0.0f, 0.0f };
 

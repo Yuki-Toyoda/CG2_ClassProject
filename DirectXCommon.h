@@ -78,6 +78,18 @@ public: // メンバ関数
 	/// <returns>バックバッファ数</returns>
 	size_t GetBackBufferCount() { return backBuffers_.size(); }
 
+	/// <summary>
+	/// ビューポートのゲッター
+	/// </summary>
+	/// <returns>ビューポート</returns>
+	D3D12_VIEWPORT* GetViewPort() { return &viewport; }
+
+	/// <summary>
+	/// シザー矩形のゲッター
+	/// </summary>
+	/// <returns>シザー矩形</returns>
+	D3D12_RECT* GetScissorRect() { return &scissorRect; }
+
 private: // メンバ変数
 
 	// ウィンドウズアプリケーションクラス

@@ -1,4 +1,4 @@
-#include "Triangle.h"
+#include "Sprite.h"
 #include <cassert>
 #include <d3dcompiler.h>
 #include "TextureManager.h"
@@ -10,29 +10,27 @@ using namespace Microsoft::WRL;
 // 静的なメンバ変数の実体を宣言する
 
 // デバイス
-ID3D12Device* Triangle::sDevice_ = nullptr;
+ID3D12Device* Sprite::sDevice_ = nullptr;
 
 // コマンドリスト
-ID3D12GraphicsCommandList* Triangle::sCommandList_ = nullptr;
+ID3D12GraphicsCommandList* Sprite::sCommandList_ = nullptr;
 // ルートシグネチャ
-ComPtr<ID3D12RootSignature> Triangle::sRootSignature_;
+ComPtr<ID3D12RootSignature> Sprite::sRootSignature_;
 // パイプラインステートオブジェクト
-ComPtr<ID3D12PipelineState> Triangle::sPipelineStates_;
+ComPtr<ID3D12PipelineState> Sprite::sPipelineStates_;
 
 // dxcUtils
-ComPtr<IDxcUtils> Triangle::dxcUtils_ = nullptr;
+ComPtr<IDxcUtils> Sprite::dxcUtils_ = nullptr;
 // dxcコンパイラ
-ComPtr<IDxcCompiler3> Triangle::dxcCompiler_ = nullptr;
+ComPtr<IDxcCompiler3> Sprite::dxcCompiler_ = nullptr;
 // InludeHandler
-ComPtr<IDxcIncludeHandler> Triangle::dxcIncludeHandler_ = nullptr;
+ComPtr<IDxcIncludeHandler> Sprite::dxcIncludeHandler_ = nullptr;
 
 // 正射影行列
-Matrix4x4 Triangle::sMatProjection_;
+Matrix4x4 Sprite::sMatProjection_;
 
-void Triangle::StaticInitialize(
-	ID3D12Device* device
-) {
-
+void Sprite::StaticInitialize(ID3D12Device* device)
+{
 	// 引数のNULLチェック
 	assert(device);
 
@@ -164,11 +162,11 @@ void Triangle::StaticInitialize(
 	// ブレンドステート
 	graphicsPipelineStateDesc.BlendState = blendDesc;
 	// ラスタライザステート
-	graphicsPipelineStateDesc.RasterizerState = rasterrizerDesc;	
+	graphicsPipelineStateDesc.RasterizerState = rasterrizerDesc;
 	// デプスステンシルビュー
 	graphicsPipelineStateDesc.DSVFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
 	graphicsPipelineStateDesc.DepthStencilState = depthStencilDesc;
-	
+
 	// 書き込むRTVの情報
 	graphicsPipelineStateDesc.NumRenderTargets = 1;
 	graphicsPipelineStateDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
@@ -186,13 +184,13 @@ void Triangle::StaticInitialize(
 		IID_PPV_ARGS(&sPipelineStates_));
 	// 生成出来ているかを確認する
 	assert(SUCCEEDED(result));
-
 }
 
-void Triangle::PreDraw(ID3D12GraphicsCommandList* cmdList) {
+void Sprite::PreDraw(ID3D12GraphicsCommandList* cmdList)
+{
 
 	// PreDrawとPostDrawがペアで呼ばれていない場合はエラー
-	assert(Triangle::sCommandList_ == nullptr);
+	assert(Sprite::sCommandList_ == nullptr);
 
 	// コマンドリストをセットする
 	sCommandList_ = cmdList;
@@ -207,18 +205,50 @@ void Triangle::PreDraw(ID3D12GraphicsCommandList* cmdList) {
 	// ルートシグネチャの設定
 	sCommandList_->SetGraphicsRootSignature(sRootSignature_.Get());
 	// プリミティブ形状の設定を行う
-	sCommandList_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	sCommandList_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 
 }
 
-void Triangle::PostDraw() {
-
+void Sprite::PostDraw()
+{
 	// 取得したコマンドリストを削除する
-	Triangle::sCommandList_ = nullptr;
-
+	Sprite::sCommandList_ = nullptr;
 }
 
-void Triangle::InitializeDXC() {
+Sprite* Sprite::Create(uint32_t textureHandle, Vector3 position, Vector4 color, Vector2 anchorPoint)
+{
+	// 仮サイズ設定
+	Vector2 size = { 100.0f, 100.0f };
+
+	// テクスチャの情報を取得
+	const D3D12_RESOURCE_DESC& resDesc =
+		TextureManager::GetInstance()->GetResourceDesc(textureHandle);
+	// 三角形のサイズをテクスチャサイズに設定
+	size = { (float)resDesc.Width, (float)resDesc.Height };
+
+	// スプライトのインスタンスを生成する
+	Sprite* sprite =
+		new Sprite(textureHandle, position, size, color, anchorPoint);
+	// スプライトの中身がnullならnullを返す
+	if (sprite == nullptr) {
+		return nullptr;
+	}
+
+	// 初期化
+	if (!sprite->Initialize()) {
+		// 作成したスプライトを削除する
+		delete sprite;
+		assert(0);
+		// nullを返す
+		return nullptr;
+	}
+
+	// スプライトを返す
+	return sprite;
+}
+
+void Sprite::InitializeDXC()
+{
 
 	// 結果確認用
 	HRESULT result = S_FALSE;
@@ -240,9 +270,8 @@ void Triangle::InitializeDXC() {
 
 }
 
-IDxcBlob* Triangle::CompileShader(
-	const std::wstring& filePath,
-	const wchar_t* profile) {
+IDxcBlob* Sprite::CompileShader(const std::wstring& filePath, const wchar_t* profile)
+{
 
 	// 結果確認用
 	HRESULT result = S_FALSE;
@@ -314,8 +343,8 @@ IDxcBlob* Triangle::CompileShader(
 
 }
 
-ComPtr<ID3D12Resource> Triangle::CreateBufferResource(ID3D12Device* device, size_t sizeInBytes) {
-
+Microsoft::WRL::ComPtr<ID3D12Resource> Sprite::CreateBufferResource(ID3D12Device* device, size_t sizeInBytes)
+{
 	// 結果確認用
 	HRESULT result = S_FALSE;
 
@@ -346,50 +375,12 @@ ComPtr<ID3D12Resource> Triangle::CreateBufferResource(ID3D12Device* device, size
 	assert(SUCCEEDED(result));
 
 	return vertexResource;
-
 }
 
-Triangle* Triangle::Create(
-	uint32_t textureHandle, Vector3 position, Vector4 color,
-	Vector2 anchorPoint
-) {
+Sprite::Sprite(){}
 
-	// 仮サイズ設定
-	Vector2 size = { 100.0f, 100.0f };
-
-	// テクスチャの情報を取得
-	const D3D12_RESOURCE_DESC& resDesc =
-		TextureManager::GetInstance()->GetResourceDesc(textureHandle);
-	// 三角形のサイズをテクスチャサイズに設定
-	size = { (float)resDesc.Width, (float)resDesc.Height };
-
-	// スプライトのインスタンスを生成する
-	Triangle* sprite =
-		new Triangle(textureHandle, position, size, color, anchorPoint);
-	// スプライトの中身がnullならnullを返す
-	if (sprite == nullptr) {
-		return nullptr;
-	}
-
-	// 初期化
-	if (!sprite->Initialize()) {
-		// 作成したスプライトを削除する
-		delete sprite;
-		assert(0);
-		// nullを返す
-		return nullptr;
-	}
-
-	// スプライトを返す
-	return sprite;
-
-}
-
-Triangle::Triangle() {}
-
-Triangle::Triangle(uint32_t textureHandle, Vector3 position, Vector2 size,
-	Vector4 color, Vector2 anchorPoint) {
-
+Sprite::Sprite(uint32_t textureHandle, Vector3 position, Vector2 size, Vector4 color, Vector2 anchorPoint)
+{
 	// 引数の値をメンバ変数に代入する
 	transform_.translate = position;
 	transform_.scale.x = size.x;
@@ -399,11 +390,10 @@ Triangle::Triangle(uint32_t textureHandle, Vector3 position, Vector2 size,
 	color_ = color;
 	textureHandle_ = textureHandle;
 	texSize_ = size;
-
 }
 
-bool Triangle::Initialize() {
-
+bool Sprite::Initialize()
+{
 	// NULLチェック
 	assert(sDevice_);
 
@@ -414,7 +404,7 @@ bool Triangle::Initialize() {
 	resourceDesc_ = TextureManager::GetInstance()->GetResourceDesc(textureHandle_);
 
 	// 頂点バッファリソース生成
-	vertBuff_ = CreateBufferResource(sDevice_, sizeof(VertexData) * 3);
+	vertBuff_ = CreateBufferResource(sDevice_, sizeof(VertexData) * kVertexNum);
 	// 頂点バッファのマッピングを行う
 	result = vertBuff_->Map(0, nullptr, reinterpret_cast<void**>(&vertMap_));
 	// マッピング出来ているかを確認する
@@ -426,7 +416,7 @@ bool Triangle::Initialize() {
 	// リソースの先頭のアドレスから使う
 	vbView_.BufferLocation = vertBuff_->GetGPUVirtualAddress();
 	// 使用するリソースのサイズを設定する
-	vbView_.SizeInBytes = sizeof(VertexData) * 3;
+	vbView_.SizeInBytes = sizeof(VertexData) * kVertexNum;
 	// 1頂点アドレスを設定する
 	vbView_.StrideInBytes = sizeof(VertexData);
 
@@ -439,11 +429,10 @@ bool Triangle::Initialize() {
 
 	// 初期化が完了したらTrueを返す
 	return true;
-
 }
 
-void Triangle::Draw(Matrix4x4 vpMatrix) {
-
+void Sprite::Draw(Matrix4x4 vpMatrix)
+{
 	// 行列変換
 	Matrix4x4 worldMatrix = MyMath::MakeAffineMatrix(transform_.scale, transform_.rotate, transform_.translate);
 	matWorld_ = MyMath::Multiply(worldMatrix, vpMatrix);
@@ -462,17 +451,17 @@ void Triangle::Draw(Matrix4x4 vpMatrix) {
 	TextureManager::GetInstance()->SetGraphicsDescriptorTable(sCommandList_, 1, textureHandle_);
 
 	// 描画コマンド
-	sCommandList_->DrawInstanced(3, 1, 0, 0);
-
+	sCommandList_->DrawInstanced(kVertexNum, 1, 0, 0);
 }
 
-void Triangle::TransferVertices() {
-
+void Sprite::TransferVertices()
+{
 	// 頂点
 	enum {
 		LB, // 左下
-		T, // 上
+		LT, // 左上
 		RB, // 右下
+		RT	// 右上
 	};
 
 	// 4頂点の座標を設定
@@ -485,8 +474,10 @@ void Triangle::TransferVertices() {
 	VertexData vertices[kVertexNum];
 
 	vertices[LB].position = { left, bottom, 0.0f, 1.0f };  // 左下
-	vertices[T].position = { 0.0f, top, 0.0f, 1.0f };     // 上
+	vertices[LT].position = { left, top, 0.0f, 1.0f };     // 左上
 	vertices[RB].position = { right, bottom, 0.0f, 1.0f }; // 右下
+	vertices[RT].position = { right, top, 0.0f, 1.0f };    // 右上
+
 
 	float tex_left = texBase_.x / resourceDesc_.Width;
 	float tex_right = (texBase_.x + texSize_.x) / resourceDesc_.Width;
@@ -494,11 +485,10 @@ void Triangle::TransferVertices() {
 	float tex_bottom = (texBase_.y + texSize_.y) / resourceDesc_.Height;
 
 	vertices[LB].uv = { tex_left, tex_bottom };  // 左下
-	vertices[T].uv = { tex_left + 0.5f, tex_top };     // 左上
+	vertices[LT].uv = { tex_left, tex_top };     // 左上
 	vertices[RB].uv = { tex_right, tex_bottom }; // 右下
+	vertices[RT].uv = { tex_right, tex_top };    // 右上
 
-	// 頂点バッファへのデータ転送を行う
+	// 頂点バッファへのデータ転送
 	memcpy(vertMap_, vertices, sizeof(vertices));
-
 }
-

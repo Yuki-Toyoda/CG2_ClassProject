@@ -35,8 +35,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	TextureManager::GetInstance()->Intialize(dxCommon->GetDevice());
 	TextureManager::Load("white1x1.png");
 
-	// スプライトクラスの静的初期化
+	// 三角形クラスの静的初期化
 	Triangle::StaticInitialize(dxCommon->GetDevice());
+	// スプライトクラスの静的初期化
+	Sprite::StaticInitialize(dxCommon->GetDevice());
 
 	// ゲームシーン初期化
 	gameScene = new GameScene();
