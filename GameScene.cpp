@@ -30,9 +30,9 @@ void GameScene::Initialize() {
 	triangle2_ = Triangle::Create(textureHandle2_, { 0.0f, 0.0f, 0.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 0.5f, 0.5f });
 	triangle2_->SetSize({ 1.0f, 0.5f });
 	// スプライトの初期化
-	sprite_ = Sprite::Create(textureHandle_, { 0.0f, 0.0f, 0.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 0.5f, 0.5f });
-	sprite_->SetSize({ 1.25f, 1.0f });
-	sprite_->SetPosition({ 2.0f, 1.0f });
+	sprite_ = Sprite::Create(textureHandle_, { 10.0f, 0.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 0.5f, 0.5f });
+	sprite_->SetSize({ 100.0f, 100.0f });
+	sprite_->SetPosition({ 360.0f, 240.0f });
 
 	// スフィア初期化
 	sphere_ = Sphere::Create(textureHandle_, { 0.0f, 0.0f, 5.0f }, 1.0f, { 1.0f, 1.0f, 1.0f, 1.0f });
@@ -51,17 +51,11 @@ void GameScene::Initialize() {
 /// </summary>
 void GameScene::Update() {
 
-	rotation.y += 0.01f;
-
-	triangle_->SetRotation(rotation);
-
 	// カメラ更新
 	cameraMatrix_ = MyMath::MakeAffineMatrix(scale_, rotate_, translate_);
 	viewMatrix_ = MyMath::Inverse(cameraMatrix_);
 	projectionMatrix_ = MyMath::MakePerspectiveFovMatrix(0.45f, float(WinApp::kWindowWidth) / float(WinApp::kwindowHeight), 0.1f, 100.0f);
 	viewProjectionMatrix_ = MyMath::Multiply(viewMatrix_, projectionMatrix_);
-
-	Vector3 rotationCheck = triangle_->GetRotation();
 
 	// カメラ移動
 	ImGui::Begin("Camera");
@@ -69,15 +63,38 @@ void GameScene::Update() {
 	ImGui::DragFloat3("rotation", &rotate_.x, 0.05f);
 	ImGui::End();
 
+	Vector3 rotationChange = triangle_->GetRotation();
+
+	if (rotationChange.x >= (float)std::numbers::pi * 2.0f || rotationChange.x <= -(float)std::numbers::pi * 2.0f) {
+		rotationChange.x = 0.0f;
+	}
+
+	if (rotationChange.y >= (float)std::numbers::pi * 2.0f || rotationChange.y <= -(float)std::numbers::pi * 2.0f) {
+		rotationChange.y = 0.0f;
+	}
+
+	if (rotationChange.z >= (float)std::numbers::pi * 2.0f || rotationChange.z <= -(float)std::numbers::pi * 2.0f) {
+		rotationChange.z = 0.0f;
+	}
+
 	ImGui::Begin("Triangle");
-	ImGui::DragFloat3("rotation", &rotationCheck.x, 0.01f);
+	ImGui::DragFloat3("rotation", &rotationChange.x, 0.01f);
 	ImGui::End();
+	triangle_->SetRotation(rotationChange);
 
+	#pragma region Light
+	// ライトデバック
 	ImGui::Begin("Light");
+	ImGui::Checkbox("lightActive", &enableLighting_);
 	ImGui::DragFloat3("Direction", &setRotation_.x, 0.05f, -1.0f, 1.0f);
+	ImGui::DragFloat("Intensity", &setIntensity_, 0.05f, 0.0f, 5.0f);
 	ImGui::End();
 
-	Sphere::SetLightRotation(setRotation_);
+	// 球ライト設定
+	Sphere::SetLightActive(0, enableLighting_);
+	Sphere::SetLightRotation(0, setRotation_);
+	Sphere::SetLightIntensity(0, setIntensity_);
+	#pragma endregion
 
 }
 
@@ -100,7 +117,7 @@ void GameScene::Draw() {
 	Sprite::PreDraw(commandList);
 
 	// スプライト描画
-	//sprite_->Draw(viewProjectionMatrix_);
+	sprite_->Draw();
 
 	// スプライト描画後処理
 	Sprite::PostDraw();

@@ -35,7 +35,7 @@ public:// 静的なメンバ関数
 	/// 静的初期化関数
 	/// </summary>
 	/// <param name="device">DXGIデバイス</param>
-	static void StaticInitialize(ID3D12Device* device);
+	static void StaticInitialize(ID3D12Device* device, int windowWidth, int windowHeight);
 
 	/// <summary>
 	/// 描画前処理
@@ -57,7 +57,7 @@ public:// 静的なメンバ関数
 	/// <param name="anchorPoint">アンカーポイント</param>
 	/// <returns>生成されたスプライト</returns>
 	static Sprite* Create(
-		uint32_t textureHandle, Vector3 position, Vector4 color = { 1,1,1,1 },
+		uint32_t textureHandle, Vector2 position, Vector4 color = { 1,1,1,1 },
 		Vector2 anchorPoint = { 0.0f, 0.0f }
 	);
 
@@ -120,7 +120,7 @@ public: // メンバ関数
 	/// <summary>
 	/// コンストラクタ
 	/// </summary>
-	Sprite(uint32_t textureHandle, Vector3 position, Vector2 size,
+	Sprite(uint32_t textureHandle, Vector2 position, Vector2 size,
 		Vector4 color, Vector2 anchorPoint);
 
 	/// <summary>
@@ -132,52 +132,50 @@ public: // メンバ関数
 	/// <summary>
 	/// 描画関数
 	/// </summary>
-	/// <param name="vpMatrix">ビュープロジェクション行列</param>
-	void Draw(Matrix4x4 vpMatrix);
+	void Draw();
 
 	/// <summary>
 	/// スプライト中心座標のセッター
 	/// </summary>
 	/// /// <param name="translation">セットする座標</param>
-	void SetPosition(const Vector3& translation) {
-		transform_.translate = translation;
+	void SetPosition(const Vector2& translation) {
+		position_ = translation;
 		TransferVertices();
 	}
 	/// <summary>
 	/// スプライト中心座標のゲッター
 	/// </summary>
 	/// <returns>中心座標</returns>
-	Vector3 GetPosition() { return transform_.translate; }
+	Vector2 GetPosition() { return position_; }
 
 	/// <summary>
 	/// 回転角のセッター
 	/// </summary>
 	/// <param name="rotation"></param>
-	void SetRotation(const Vector3& rotation) {
-		transform_.rotate = rotation;
+	void SetRotation(const float& rotation) {
+		rotation_ = rotation;
 		TransferVertices();
 	}
 	/// <summary>
 	/// 回転角のゲッター
 	/// </summary>
 	/// <returns></returns>
-	Vector3 GetRotation() { return transform_.rotate; }
+	float GetRotation() { return rotation_; }
 
 	/// <summary>
 	/// サイズのセッター
 	/// </summary>
 	/// <param name="size">設定するサイズ</param>
 	void SetSize(const Vector2& size) {
-		transform_.scale.x = size.x;
-		transform_.scale.y = size.y;
+		size_ = size;
 		TransferVertices();
 	}
 	/// <summary>
 	/// サイズのゲッター
 	/// </summary>
 	/// <returns>サイズ</returns>
-	Vector3 GetSize() {
-		return transform_.scale;
+	Vector2 GetSize() {
+		return size_;
 	}
 
 private: // メンバ変数
@@ -194,9 +192,8 @@ private: // メンバ変数
 	// 頂点バッファビュー
 	D3D12_VERTEX_BUFFER_VIEW vbView_{};
 
-	// 構造体
-	MyTransform transform_{};
-
+	// スプライト起点座標
+	Vector2 position_{};
 	// スプライトの幅と高さ
 	Vector2 size_ = { 100.0f, 100.0f };
 	// 回転角

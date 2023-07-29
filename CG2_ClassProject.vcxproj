@@ -160,6 +160,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="ImGuiManager.cpp" />
     <ClCompile Include="LightGroup.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Model.cpp" />
     <ClCompile Include="MyMath.cpp" />
     <ClCompile Include="Sphere.cpp" />
     <ClCompile Include="Sprite.cpp" />
@@ -183,6 +184,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="ImGuiManager.h" />
     <ClInclude Include="LightGroup.h" />
     <ClInclude Include="Matrix4x4.h" />
+    <ClInclude Include="Model.h" />
     <ClInclude Include="MyMath.h" />
     <ClInclude Include="MyStruct.h" />
     <ClInclude Include="SafeDelete.h" />

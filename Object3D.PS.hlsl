@@ -12,23 +12,20 @@ PixelShaderOutput main(VertexShaderOutput input)
     
     float4 textureColor = gTexture.Sample(gSampler, input.texcoord);
     
-    if (enableLighting != 0)
+    // 平行光源
+    for (int i = 0; i < kDirectionalLight; i++)
     {
-        // 平行光源
-        for (int i = 0; i < kDirectionalLight; i++)
+        if (directionalLight[i].active)
         {
-            if (directionalLight[i].active)
-            {
-                float NdotL = dot(normalize(input.normal), -normalize(directionalLight[i].direciton));
-                float cos = pow(NdotL * 0.5f + 0.5f, 2.0f);
-                output.color = color * textureColor * directionalLight[i].color * cos * directionalLight[i].intensity;
-            }
+            float NdotL = dot(normalize(input.normal), -normalize(directionalLight[i].direciton));
+            float cos = pow(NdotL * 0.5f + 0.5f, 2.0f);
+            output.color = color * textureColor * directionalLight[i].color * cos * directionalLight[i].intensity;
         }
-    }
-    else
-    {
+        else
+        {
          // 色を設定する
-        output.color = color * textureColor;
+            output.color = color * textureColor;
+        }
     }
     
     // 出力する

@@ -40,7 +40,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	// 三角形クラスの静的初期化
 	Triangle::StaticInitialize(dxCommon->GetDevice());
 	// スプライトクラスの静的初期化
-	Sprite::StaticInitialize(dxCommon->GetDevice());
+	Sprite::StaticInitialize(dxCommon->GetDevice(), WinApp::kWindowWidth, WinApp::kwindowHeight);
 	// 球クラスの静的初期化
 	Sphere::StaticInitialize(dxCommon->GetDevice());
 

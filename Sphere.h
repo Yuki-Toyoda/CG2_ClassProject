@@ -95,10 +95,18 @@ public: // 静的なメンバ関数
 	/// <returns></returns>
 	static Microsoft::WRL::ComPtr<ID3D12Resource> CreateBufferResource(ID3D12Device* device, size_t sizeInBytes);
 
+	static void SetLightActive(int index, bool active) { lightGroup_->SetDirectionalLightActive(index, active); }
+
 	/// <summary>
-	/// 
+	/// ライト角度のセッター
 	/// </summary>
-	static void SetLightRotation(Vector3 rotation) { lightGroup_->SetDirectionalLightDirection(0, rotation); }
+	static void SetLightRotation(int index, Vector3 rotation) { lightGroup_->SetDirectionalLightDirection(index, rotation); }
+
+	/// <summary>
+	/// ライト輝度セッター
+	/// </summary>
+	/// <param name="intensity"></param>
+	static void SetLightIntensity(int index, float intensity) { lightGroup_->SetDirectionalLightIntensity(index, intensity); }
 
 private: // 静的なメンバ変数
 

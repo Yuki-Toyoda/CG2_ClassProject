@@ -29,7 +29,7 @@ ComPtr<IDxcIncludeHandler> Sprite::dxcIncludeHandler_ = nullptr;
 // 正射影行列
 Matrix4x4 Sprite::sMatProjection_;
 
-void Sprite::StaticInitialize(ID3D12Device* device)
+void Sprite::StaticInitialize(ID3D12Device* device, int windowWidth, int windowHeight)
 {
 	// 引数のNULLチェック
 	assert(device);
@@ -184,6 +184,9 @@ void Sprite::StaticInitialize(ID3D12Device* device)
 		IID_PPV_ARGS(&sPipelineStates_));
 	// 生成出来ているかを確認する
 	assert(SUCCEEDED(result));
+
+	sMatProjection_ = MyMath::MakeOrthGraphicMatrix(0.0f, 0.0f, (float)windowWidth, (float)windowHeight, 0.0f, 100.0f);
+
 }
 
 void Sprite::PreDraw(ID3D12GraphicsCommandList* cmdList)
@@ -215,7 +218,7 @@ void Sprite::PostDraw()
 	Sprite::sCommandList_ = nullptr;
 }
 
-Sprite* Sprite::Create(uint32_t textureHandle, Vector3 position, Vector4 color, Vector2 anchorPoint)
+Sprite* Sprite::Create(uint32_t textureHandle, Vector2 position, Vector4 color, Vector2 anchorPoint)
 {
 	// 仮サイズ設定
 	Vector2 size = { 100.0f, 100.0f };
@@ -377,12 +380,11 @@ Microsoft::WRL::ComPtr<ID3D12Resource> Sprite::CreateBufferResource(ID3D12Device
 
 Sprite::Sprite(){}
 
-Sprite::Sprite(uint32_t textureHandle, Vector3 position, Vector2 size, Vector4 color, Vector2 anchorPoint)
+Sprite::Sprite(uint32_t textureHandle, Vector2 position, Vector2 size, Vector4 color, Vector2 anchorPoint)
 {
 	// 引数の値をメンバ変数に代入する
-	transform_.translate = position;
-	transform_.scale.x = size.x;
-	transform_.scale.y = size.y;
+	position_ = position;
+	size_ = size;
 	anchorPoint_ = anchorPoint;
 	matWorld_ = MyMath::MakeIdentity4x4();
 	color_ = color;
@@ -429,16 +431,18 @@ bool Sprite::Initialize()
 	return true;
 }
 
-void Sprite::Draw(Matrix4x4 vpMatrix)
+void Sprite::Draw()
 {
-	// 行列変換
-	Matrix4x4 worldMatrix = MyMath::MakeAffineMatrix(transform_.scale, transform_.rotate, transform_.translate);
-	matWorld_ = MyMath::Multiply(worldMatrix, vpMatrix);
+
+	matWorld_ = MyMath::MakeIdentity4x4();
+	matWorld_ = MyMath::Multiply(matWorld_, MyMath::MakeRotateZMatrix(rotation_));
+	matWorld_ = MyMath::Multiply(matWorld_, MyMath::MakeTranslateMatrix({ position_.x, position_.y, 0.0f }));
 
 	// 色を設定
 	constMap_->color = color_;
 	// 行列を設定
-	constMap_->mat = matWorld_;
+	constMap_->mat = MyMath::Multiply(matWorld_, sMatProjection_);
+	//constMap_->mat = matWorld_;
 
 	// 頂点バッファの設定
 	sCommandList_->IASetVertexBuffers(0, 1, &vbView_);
@@ -463,10 +467,10 @@ void Sprite::TransferVertices()
 	};
 
 	// 4頂点の座標を設定
-	float left = (0.0f - anchorPoint_.x) * transform_.scale.x;
-	float right = (1.0f - anchorPoint_.x) * transform_.scale.x;
-	float top = (1.0f - anchorPoint_.y) * transform_.scale.y;
-	float bottom = (0.0f - anchorPoint_.y) * transform_.scale.y;
+	float left = (0.0f - anchorPoint_.x) * size_.x;
+	float right = (1.0f - anchorPoint_.x) * size_.x;
+	float top = (0.0f - anchorPoint_.y) * size_.y;
+	float bottom = (1.0f - anchorPoint_.y) * size_.y;
 
 	// 頂点データ
 	VertexData vertices[kVertexNum];

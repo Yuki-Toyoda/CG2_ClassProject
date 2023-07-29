@@ -44,7 +44,12 @@ private: // メンバ変数
 	// DirectX汎用クラス
 	DirectXCommon* dxCommon_ = nullptr;
 
+	// ImGui用ライト角度
 	Vector3 setRotation_ = { 0.0f, -1.0f, 0.0f };
+	// ImGui用ライト輝度
+	float setIntensity_ = 1.0f;
+	// ImGui用ライト有効フラグ
+	bool enableLighting_ = true;
 
 	// カメラ座標
 	Vector3 translate_ = { 0.0f, 0.0f, -10.0f };
@@ -78,6 +83,7 @@ private: // メンバ変数
 	uint32_t textureHandle2_ = 0u;
 
 	Vector3 rotation = { 0.0f, 0.0f, 0.0f };
+	float spriteRotation = 0.0f;
 
 };
 
