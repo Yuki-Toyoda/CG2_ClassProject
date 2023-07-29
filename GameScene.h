@@ -1,11 +1,11 @@
 #pragma once
+#include <vector>
 #include "DirectXCommon.h"
 #include "LightGroup.h"
 #include "Triangle.h"
 #include "Sprite.h"
 #include "Sphere.h"
 #include "Model.h"
-
 #include "externals/imgui/imgui.h"
 
 /// <summary>
@@ -69,25 +69,42 @@ private: // メンバ変数
 	Matrix4x4 viewProjectionMatrix_;
 
 	// 三角形
-	Triangle* triangle_ = nullptr;
-	Triangle* triangle2_ = nullptr;
+	std::vector<Triangle*> triangles_;
+	// 三角形最大数
+	static const int kMaxTriangles_ = 3;
+	int32_t isDeleteTriangles_[kMaxTriangles_] = { false };
 
 	// スプライト
-	Sprite* sprite_ = nullptr;
+	std::vector<Sprite*> sprites_;
+	// スプライト最大数
+	static const int kMaxSprites_ = 5;
+	int32_t isDeleteSprites_[kMaxSprites_] = { false };
 
 	// 球
-	Sphere* sphere_ = nullptr;
-	Sphere* sphere2_ = nullptr;
+	std::vector<Sphere*> spheres_;
+	// 球最大数
+	static const int kMaxSpheres_ = 3;
+	int32_t isDeletespheres_[kMaxSpheres_] = { false };
 
-	Model* model_ = nullptr;
-	Model* model2_ = nullptr;
+	// obj
+	std::vector<Model*> models_;
+	// obj最大数
+	static const int kMaxModels_ = 3;
+	int32_t isDeleteModels_[kMaxModels_] = { false };
 
 	// テクスチャ
-	uint32_t textureHandle_ = 0u;
-	uint32_t textureHandle2_ = 0u;
+	uint32_t sampleTextureHandle_ = 0u;
 
-	Vector3 rotation = { 0.0f, 0.0f, 0.0f };
-	float spriteRotation = 0.0f;
+	// テクスチャ群
+	std::vector<uint32_t> textureHandles_;
+	// テクスチャ最大数
+	static const int kMaxTextures_ = 10;
+	int32_t isDeleteTextures_[kMaxTextures_] = { false };
+	// ImGui用変数群
+	Vector3 spawnPositon_ = { 0.0f, 0.0f, 0.0f }; // オブジェクトスポーン座標
+	char loadTextureName_[32] = "";
+	int selectingTexture_ = 999;
 
+	char loadModelDirectoryPath_[32] = "./Resources";
+	char loadModelFileName_[32] = "";
 };
-

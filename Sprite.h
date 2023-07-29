@@ -178,6 +178,17 @@ public: // メンバ関数
 		return size_;
 	}
 
+	/// <summary>
+	/// 色のセッター
+	/// </summary>
+	/// <param name="color">設定する色</param>
+	void SetColor(Vector4 color) { color_ = color; }
+	/// <summary>
+	/// 色のゲッター
+	/// </summary>
+	/// <returns>色</returns>
+	Vector4 GetColor() { return color_; }
+
 private: // メンバ変数
 
 	// 頂点バッファ

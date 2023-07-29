@@ -181,9 +181,20 @@ public: // メンバ関数
 	/// サイズのゲッター
 	/// </summary>
 	/// <returns>サイズ</returns>
-	Vector3 GetSize() {
-		return transform_.scale;
+	Vector2 GetSize() {
+		return { transform_.scale.x, transform_.scale.y };
 	}
+
+	/// <summary>
+	/// 色のセッター
+	/// </summary>
+	/// <param name="color">設定する色</param>
+	void SetColor(Vector4 color) { color_ = color; }
+	/// <summary>
+	/// 色のゲッター
+	/// </summary>
+	/// <returns>色</returns>
+	Vector4 GetColor() { return color_; }
 
 private: // メンバ変数
 

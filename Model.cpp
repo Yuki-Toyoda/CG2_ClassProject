@@ -415,7 +415,7 @@ Model::ModelData Model::LoadObjFile(const std::string& directoryPath, const std:
 			Vector2 uv;
 			// 空文字区切りで1つずつ値を読む
 			s >> uv.x >> uv.y;
-			uv.x *= -1.0f;
+			uv.x = (1.0f - uv.x);
 			uv.y *= -1.0f;
 			// UVの配列に追加する
 			uv_.push_back(uv);
@@ -427,6 +427,7 @@ Model::ModelData Model::LoadObjFile(const std::string& directoryPath, const std:
 			// 空文字区切りで１つずつ値を読む
 			s >> normal.x >> normal.y >> normal.z;
 			normal.x *= -1.0f;
+			normal.z *= -1.0f;
 			// 法線の配列に追加する
 			normal_.push_back(normal);
 		}

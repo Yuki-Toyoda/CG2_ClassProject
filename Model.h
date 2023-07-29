@@ -207,9 +207,8 @@ public: // メンバ関数
 	/// サイズのセッター
 	/// </summary>
 	/// <param name="size">設定するサイズ</param>
-	void SetSize(const Vector2& size) {
-		transform_.scale.x = size.x;
-		transform_.scale.y = size.y;
+	void SetSize(const Vector3& size) {
+		transform_.scale = size;
 		TransferVertices();
 	}
 	/// <summary>
@@ -219,6 +218,17 @@ public: // メンバ関数
 	Vector3 GetSize() {
 		return transform_.scale;
 	}
+
+	/// <summary>
+	/// 色のセッター
+	/// </summary>
+	/// <param name="color">設定する色</param>
+	void SetColor(Vector4 color) { color_ = color; }
+	/// <summary>
+	/// 色のゲッター
+	/// </summary>
+	/// <returns>色</returns>
+	Vector4 GetColor() { return color_; }
 
 private: // メンバ変数
 
