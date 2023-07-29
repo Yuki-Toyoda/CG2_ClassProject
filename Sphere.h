@@ -30,11 +30,18 @@ private: // サブクラス
 	/// <summary>
 	/// 定数バッファデータ構造体
 	/// </summary>
-	struct MaterialData {
+	struct ConstBufferData {
 		Vector4 color;
 		Matrix4x4 mat;
 		Matrix4x4 world;
 		int32_t enableLighting;
+	};
+
+	/// <summary>
+	/// マテリアル
+	/// </summary>
+	struct MaterialData {
+		std::string textureFilePath;
 	};
 
 public: // 静的なメンバ関数
@@ -216,7 +223,7 @@ private: // メンバ変数
 	// 頂点バッファマップ
 	VertexData* vertMap_ = nullptr;
 	// 定数バッファマップ
-	MaterialData* constMap_ = nullptr;
+	ConstBufferData* constMap_ = nullptr;
 
 	// 頂点バッファビュー
 	D3D12_VERTEX_BUFFER_VIEW vbView_{};

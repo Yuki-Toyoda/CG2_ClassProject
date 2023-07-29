@@ -4,6 +4,7 @@
 #include "Triangle.h"
 #include "Sprite.h"
 #include "Sphere.h"
+#include "Model.h"
 
 #include "externals/imgui/imgui.h"
 
@@ -77,6 +78,9 @@ private: // メンバ変数
 	// 球
 	Sphere* sphere_ = nullptr;
 	Sphere* sphere2_ = nullptr;
+
+	Model* model_ = nullptr;
+	Model* model2_ = nullptr;
 
 	// テクスチャ
 	uint32_t textureHandle_ = 0u;

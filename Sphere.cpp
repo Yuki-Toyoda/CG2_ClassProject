@@ -426,7 +426,7 @@ bool Sphere::Initialize()
 	vbView_.StrideInBytes = sizeof(VertexData);
 
 	// 定数バッファリソース作成
-	constBuff_ = CreateBufferResource(sDevice_, sizeof(MaterialData));
+	constBuff_ = CreateBufferResource(sDevice_, sizeof(ConstBufferData));
 	// 定数バッファのマッピングを行う
 	result = constBuff_->Map(0, nullptr, reinterpret_cast<void**>(&constMap_));
 	// マッピングできているかを確認する

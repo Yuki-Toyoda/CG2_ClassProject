@@ -4,6 +4,7 @@
 #include "Triangle.h"
 #include "Sprite.h"
 #include "Sphere.h"
+#include "Model.h"
 #include "GameScene.h"
 #include "TextureManager.h"
 #include "SafeDelete.h"
@@ -43,6 +44,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	Sprite::StaticInitialize(dxCommon->GetDevice(), WinApp::kWindowWidth, WinApp::kwindowHeight);
 	// 球クラスの静的初期化
 	Sphere::StaticInitialize(dxCommon->GetDevice());
+	// 3Dモデルクラスの静的初期化
+	Model::StaticInitialize(dxCommon->GetDevice());
 
 	// ゲームシーン初期化
 	gameScene = new GameScene();
