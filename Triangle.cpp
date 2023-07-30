@@ -466,6 +466,14 @@ void Triangle::Draw(Matrix4x4 vpMatrix) {
 
 }
 
+void Triangle::SetTextureHandle(uint32_t textureHandle)
+{
+	textureHandle_ = textureHandle;
+	resourceDesc_ = TextureManager::GetInstance()->GetResourceDesc(textureHandle_);
+	// 頂点バッファへのデータ転送
+	TransferVertices();
+}
+
 void Triangle::TransferVertices() {
 
 	// 頂点
@@ -488,14 +496,9 @@ void Triangle::TransferVertices() {
 	vertices[T].position = { 0.0f, top, 0.0f, 1.0f };     // 上
 	vertices[RB].position = { right, bottom, 0.0f, 1.0f }; // 右下
 
-	float tex_left = texBase_.x / resourceDesc_.Width;
-	float tex_right = (texBase_.x + texSize_.x) / resourceDesc_.Width;
-	float tex_top = texBase_.y / resourceDesc_.Height;
-	float tex_bottom = (texBase_.y + texSize_.y) / resourceDesc_.Height;
-
-	vertices[LB].uv = { tex_left, tex_bottom };  // 左下
-	vertices[T].uv = { tex_left + 0.5f, tex_top };     // 左上
-	vertices[RB].uv = { tex_right, tex_bottom }; // 右下
+	vertices[LB].uv = { 0.0f, 1.0f };  // 左下
+	vertices[T].uv = { 0.5f, 0.0f };     // 左上
+	vertices[RB].uv = { 1.0f, 1.0f }; // 右下
 
 	// 頂点バッファへのデータ転送を行う
 	memcpy(vertMap_, vertices, sizeof(vertices));

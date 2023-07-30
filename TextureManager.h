@@ -77,6 +77,18 @@ public: // メンバ関数
 	const D3D12_RESOURCE_DESC GetResourceDesc(uint32_t textureHandle);
 
 	/// <summary>
+	/// テクスチャ名を取得する関数
+	/// </summary>
+	const std::string GetTextureName(uint32_t textureHandle);
+
+	/// <summary>
+	/// テクスチャのGPUハンドルを取得する関数
+	/// </summary>
+	/// <param name="textureHandle">取得するテクスチャ</param>
+	/// <returns>テクスチャGPUハンドル</returns>
+	const D3D12_GPU_DESCRIPTOR_HANDLE GetTextureGPUHandle(uint32_t textureHandle);
+
+	/// <summary>
 	/// ディスクリプタテーブルセット関数
 	/// </summary>
 	/// <param name="commandList">コマンドリスト</param>

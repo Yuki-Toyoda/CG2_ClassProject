@@ -58,11 +58,9 @@ private: // コンストラクタ等
 	const ImGuiManager& operator=(const ImGuiManager&) = delete;
 
 private: // メンバ変数
-#ifdef _DEBUG
 	// DirectX基盤インスタンス（借りてくる）
 	DirectXCommon* dxCommon_ = nullptr;
 	// SRV用ヒープ
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> srvHeap_;
-#endif
 };
 

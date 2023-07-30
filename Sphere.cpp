@@ -469,6 +469,12 @@ void Sphere::Draw(Matrix4x4 vpMatrix)
 
 }
 
+void Sphere::SetTextureHandle(uint32_t textureHandle)
+{
+	textureHandle_ = textureHandle;
+	resourceDesc_ = TextureManager::GetInstance()->GetResourceDesc(textureHandle_);
+}
+
 void Sphere::TransferVertices()
 {
 	// 頂点データ
@@ -547,5 +553,3 @@ void Sphere::TransferVertices()
 	memcpy(vertMap_, vertices, sizeof(vertices));
 
 }
-
-

@@ -86,6 +86,26 @@ const D3D12_RESOURCE_DESC TextureManager::GetResourceDesc(uint32_t textureHandle
 	return texture.resource->GetDesc();
 }
 
+const std::string TextureManager::GetTextureName(uint32_t textureHandle) {
+	// 指定したテクスチャがテクスチャサイズを超過していないか確認する
+	assert(textureHandle < textures_.size());
+
+	// 指定したテクスチャの要素取得
+	Texture& texture = textures_.at(textureHandle);
+	// テクスチャ情報を返す
+	return texture.name;
+}
+
+const D3D12_GPU_DESCRIPTOR_HANDLE TextureManager::GetTextureGPUHandle(uint32_t textureHandle) {
+	// 指定したテクスチャがテクスチャサイズを超過していないか確認する
+	assert(textureHandle < textures_.size());
+
+	// 指定したテクスチャの要素取得
+	Texture& texture = textures_.at(textureHandle);
+	// テクスチャ情報を返す
+	return texture.gpuDescriptorHnadleSRV;
+}
+
 void TextureManager::SetGraphicsDescriptorTable(ID3D12GraphicsCommandList* commandList, UINT rotParamIndex, uint32_t textureHandle)
 {
 	// テクスチャハンドルがテクスチャサイズを超過していないか確認する

@@ -405,8 +405,8 @@ Model::ModelData Model::LoadObjFile(const std::string& directoryPath, const std:
 			s >> position.x >> position.y >> position.z;
 			// wを設定
 			position.w = 1.0f;
-			// 頂点の配列に追加する
 			position.x *= -1.0f;
+			// 頂点の配列に追加する
 			positions_.push_back(position);
 		}
 		// UVだった場合
@@ -415,8 +415,7 @@ Model::ModelData Model::LoadObjFile(const std::string& directoryPath, const std:
 			Vector2 uv;
 			// 空文字区切りで1つずつ値を読む
 			s >> uv.x >> uv.y;
-			uv.x = (1.0f - uv.x);
-			uv.y *= -1.0f;
+			uv.y = 1.0f - uv.y;
 			// UVの配列に追加する
 			uv_.push_back(uv);
 		}
@@ -427,12 +426,12 @@ Model::ModelData Model::LoadObjFile(const std::string& directoryPath, const std:
 			// 空文字区切りで１つずつ値を読む
 			s >> normal.x >> normal.y >> normal.z;
 			normal.x *= -1.0f;
-			normal.z *= -1.0f;
 			// 法線の配列に追加する
 			normal_.push_back(normal);
 		}
 		// 終了なら
 		else if (identifier == "f") {
+			VertexData triangle[3];
 			// 面は三角形のみ、　そのほかは対応していない
 			for (int32_t faceVertex = 0; faceVertex < 3; faceVertex++) {
 				// 頂点情報
@@ -453,9 +452,13 @@ Model::ModelData Model::LoadObjFile(const std::string& directoryPath, const std:
 				Vector4 position = positions_[elementIndices[0] - 1];
 				Vector2 uv = uv_[elementIndices[1] - 1];
 				Vector3 normal = normal_[elementIndices[2] - 1];
-				VertexData vertex = { position, uv, normal };
-				modelData_.vertices.push_back(vertex);
+				triangle[faceVertex] = { position, uv, normal };
+				//VertexData vertex = { position, uv, normal };
+				//modelData_.vertices.push_back(vertex);
 			}
+			modelData_.vertices.push_back(triangle[2]);
+			modelData_.vertices.push_back(triangle[1]);
+			modelData_.vertices.push_back(triangle[0]);
 		}
 		else if (identifier == "mtllib") {
 			std::string materialFileName;
@@ -582,6 +585,12 @@ void Model::Draw(Matrix4x4 vpMatrix)
 
 	// 描画コマンド
 	sCommandList_->DrawInstanced((UINT)myModelData_.vertices.size(), 1, 0, 0);
+}
+
+void Model::SetTextureHandle(uint32_t textureHandle)
+{
+	textureHandle_ = textureHandle;
+	resourceDesc_ = TextureManager::GetInstance()->GetResourceDesc(textureHandle_);
 }
 
 void Model::TransferVertices()

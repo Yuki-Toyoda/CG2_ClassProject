@@ -196,6 +196,12 @@ public: // メンバ関数
 	/// <returns>色</returns>
 	Vector4 GetColor() { return color_; }
 
+	/// <summary>
+	/// テクスチャハンドルの設定
+	/// </summary>
+	/// <param name="textureHandle">テクスチャハンドル</param>
+	void SetTextureHandle(uint32_t textureHandle);
+
 private: // メンバ変数
 
 	// 頂点バッファ

@@ -10,7 +10,8 @@ GameScene::GameScene() {};
 /// <summary>
 /// デストラクタ
 /// </summary>
-GameScene::~GameScene() {};
+GameScene::~GameScene() {
+};
 
 /// <summary>
 /// 初期化処理
@@ -27,6 +28,56 @@ void GameScene::Initialize() {
 	viewMatrix_ = MyMath::Inverse(cameraMatrix_);
 	projectionMatrix_ = MyMath::MakePerspectiveFovMatrix(0.45f, float(WinApp::kWindowWidth) / float(WinApp::kwindowHeight), 0.1f, 100.0f);
 	viewProjectionMatrix_ = MyMath::Multiply(viewMatrix_, projectionMatrix_);
+	
+	// white1x1.pngの読み込み
+	uint32_t texture = TextureManager::Load("white1x1.png");
+	textureHandles_.push_back(texture);
+	// UVChecker.pngの読み込み
+	texture = TextureManager::Load("uvChecker.png");
+	textureHandles_.push_back(texture);
+
+	// 三角形を生成
+	Triangle* tempTriangle = Triangle::Create(textureHandles_[0], {2.5f, 0.5f, 1.0f}, { 1.0f, 1.0f, 1.0f, 1.0f }, { 0.5f, 0.5f });
+	// リストに加える
+	triangles_.push_back(tempTriangle);
+	// 三角形を生成
+	tempTriangle = Triangle::Create(textureHandles_[1], { 3.0f, 1.25f, 2.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 0.5f, 0.5f });
+	tempTriangle->SetSize({ 2.0f, 2.0f });
+	// リストに加える
+	triangles_.push_back(tempTriangle);
+
+	// スプライトを生成
+	Sprite* tempSprite = Sprite::Create(textureHandles_[0], {250.0f, 100.0f}, {1.0f, 1.0f, 1.0f, 1.0f}, {0.5f, 0.5f});
+	tempSprite->SetSize({ 100.0f, 100.0f });
+	// リストに加える
+	sprites_.push_back(tempSprite);
+	tempSprite = Sprite::Create(textureHandles_[1], {200.0f, 300.0f}, {1.0f, 1.0f, 1.0f, 1.0f}, {0.5f, 0.5f});
+	tempSprite->SetSize({ 256.0f, 256.0f });
+	// リストに加える
+	sprites_.push_back(tempSprite);
+
+	// 球を生成
+	Sphere* tempSphere = Sphere::Create(textureHandles_[1], { 0.5f, 0.5f, 3.0f}, 1.0f, { 1.0f, 1.0f, 1.0f, 1.0f });
+	// リストに加える
+	spheres_.push_back(tempSphere);
+	// 球を生成
+	tempSphere = Sphere::Create(textureHandles_[0], { -1.5f, 1.0f, 5.0f }, 2.0f, { 1.0f, 1.0f, 1.0f, 1.0f });
+	// リストに加える
+	spheres_.push_back(tempSphere);
+
+	// モデルを生成
+	Model* tempModel = Model::Create(textureHandles_[0], {2.0f, -1.0f, 0.0f}, { 1.0f, 1.0f, 1.0f, 1.0f }, "./Resources", "teapot.obj");
+	tempModel->SetRotation({ 0.0f, 0.5f, 0.0f });
+	// リストに加える
+	models_.push_back(tempModel);
+	tempModel = Model::Create(textureHandles_[0], { -0.5f, -1.75f, -1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, "./Resources", "bunny.obj");
+	tempModel->SetRotation({ 0.0f, -0.5f, 0.0f });
+	// リストに加える
+	models_.push_back(tempModel);
+	tempModel = Model::Create(textureHandles_[0], { -2.5f, -1.0f, 0.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, "./Resources", "plane.obj");
+	tempModel->SetRotation({ 0.0f, -0.5f, 0.0f });
+	// リストに加える
+	models_.push_back(tempModel);
 
 }
 
@@ -43,6 +94,7 @@ void GameScene::Update() {
 
 	// デバック関連ウィンドウ
 	ImGui::Begin("Debug");
+
 	#pragma region ライト
 	// ライトデバック
 	if (ImGui::TreeNode("Light")) {
@@ -82,20 +134,23 @@ void GameScene::Update() {
 #pragma endregion
 	#pragma region テクスチャ一覧と削除
 	if (ImGui::TreeNode("Textures")) {
-		if (triangles_.size() == 0)
+		if (textureHandles_.size() == 0)
 			ImGui::Text("NoTextures!");
 
 		ImGui::RadioButton("Don't use texture", &selectingTexture_, 999);
 
 		// 全てのテクスチャ表示
 		for (int i = 0; i < textureHandles_.size(); i++) {
-			char tree[16] = "";
-			sprintf_s(tree, "texture%d", i);
-			if (ImGui::TreeNode(tree)) {
+			std::string textureName = TextureManager::GetInstance()->GetTextureName(textureHandles_[i]);
+			D3D12_GPU_DESCRIPTOR_HANDLE textureGpuHandle = TextureManager::GetInstance()->GetTextureGPUHandle(textureHandles_[i]);
+			D3D12_RESOURCE_DESC textureDesc = TextureManager::GetInstance()->GetResourceDesc(textureHandles_[i]);
+
+			if (ImGui::TreeNode(textureName.c_str())) {
 				ImGui::RadioButton("UseThisTexture", &selectingTexture_, i);
 				if (ImGui::Button("Delete This")) {
 					isDeleteTextures_[i] = true;
 				}
+				ImGui::Text("GPU handle = %p", textureGpuHandle.ptr);
 				ImGui::TreePop();
 			}
 		}
@@ -119,7 +174,7 @@ void GameScene::Update() {
 	// 3Dモデルのディレクトリ設定
 	ImGui::InputText("DirectoryPath", loadModelDirectoryPath_, sizeof(loadModelDirectoryPath_));
 	ImGui::InputText("FileName", loadModelFileName_, sizeof(loadModelFileName_));
-
+	ImGui::NewLine();
 	if (ImGui::BeginMenu("ObjectCreate")) {
 		// 三角形の生成
 		// 三角形の最大数に達していないか
@@ -221,6 +276,7 @@ void GameScene::Update() {
 		ImGui::EndMenu();
 	}
 #pragma endregion
+	ImGui::NewLine();
 	#pragma region 三角形のデバック
 	if (ImGui::TreeNode("Triangles")) {
 		if (triangles_.size() == 0)
@@ -249,6 +305,12 @@ void GameScene::Update() {
 				ImGui::DragFloat3("Rotation", &rotation.x, 0.05f);
 				ImGui::DragFloat3("translation", &translation.x, 0.05f);
 				ImGui::ColorEdit4("color", &color.x);
+
+				if (selectingTexture_ != 999) {
+					if (ImGui::Button("Change to selected texture")) {
+						triangles_[i]->SetTextureHandle(selectingTexture_);
+					}
+				}
 
 				if (ImGui::Button("Delete This")) {
 					isDeleteTriangles_[i] = true;
@@ -299,6 +361,12 @@ void GameScene::Update() {
 				ImGui::DragFloat2("translation", &translation.x, 1.0f);
 				ImGui::ColorEdit4("color", &color.x);
 
+				if (selectingTexture_ != 999) {
+					if (ImGui::Button("Change to selected texture")) {
+						sprites_[i]->SetTextureHandle(selectingTexture_);
+					}
+				}
+				
 				if (ImGui::Button("Delete This")) {
 					isDeleteSprites_[i] = true;
 				}
@@ -353,6 +421,12 @@ void GameScene::Update() {
 				ImGui::DragFloat3("translation", &translation.x, 0.05f);
 				ImGui::ColorEdit4("color", &color.x);
 
+				if (selectingTexture_ != 999) {
+					if (ImGui::Button("Change to selected texture")) {
+						spheres_[i]->SetTextureHandle(selectingTexture_);
+					}
+				}
+
 				if (ImGui::Button("Delete This")) {
 					isDeletespheres_[i] = true;
 				}
@@ -406,6 +480,12 @@ void GameScene::Update() {
 				ImGui::DragFloat3("Rotation", &rotation.x, 0.05f);
 				ImGui::DragFloat3("translation", &translation.x, 0.05f);
 				ImGui::ColorEdit4("color", &color.x);
+
+				if (selectingTexture_ != 999) {
+					if (ImGui::Button("Change to selected texture")) {
+						models_[i]->SetTextureHandle(selectingTexture_);
+					}
+				}
 
 				if (ImGui::Button("Delete This")) {
 					isDeleteModels_[i] = true;

@@ -89,7 +89,7 @@ private: // メンバ変数
 	// obj
 	std::vector<Model*> models_;
 	// obj最大数
-	static const int kMaxModels_ = 3;
+	static const int kMaxModels_ = 5;
 	int32_t isDeleteModels_[kMaxModels_] = { false };
 
 	// テクスチャ
