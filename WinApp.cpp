@@ -1,5 +1,9 @@
 #include "WinApp.h"
 
+#include "externals/imgui/imgui_impl_win32.h"
+extern IMGUI_IMPL_API LRESULT
+ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+
 // ウィンドウ名
 const wchar_t WinApp::kWindowClassName[] = L"DirectXGame";
 
@@ -23,7 +27,9 @@ WinApp* WinApp::GetInstance() {
 /// <param name="lparam">メッセージ番号2</param>
 /// <returns>成否</returns>
 LRESULT WinApp::WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
-
+	// imGui1でウィンドウの入力を受け取る
+	if (ImGui_ImplWin32_WndProcHandler(hwnd, msg, wparam, lparam))
+		return true;
 	// メッセージに応じてゲーム固有の処理を行う
 	switch (msg)
 	{
