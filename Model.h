@@ -119,6 +119,13 @@ public: // メンバ関数
 	/// <param name="intensity"></param>
 	static void SetLightIntensity(int index, float intensity) { lightGroup_->SetDirectionalLightIntensity(index, intensity); }
 
+	/// <summary>
+	/// ライト色セッター
+	/// </summary>
+	/// <param name="index">ライト番号</param>
+	/// <param name="color">色</param>
+	static void SetLightColor(int index, Vector4 color) { lightGroup_->SetDirectionalLightColor(index, color); }
+
 private: // 静的なメンバ変数
 
 	// デバイス

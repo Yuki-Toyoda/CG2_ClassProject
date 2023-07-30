@@ -101,11 +101,14 @@ void GameScene::Update() {
 
 		ImGui::Checkbox("lightActive", &enableLighting_);
 		ImGui::DragFloat3("Direction", &setRotation_.x, 0.05f, -1.0f, 1.0f);
+		ImGui::ColorEdit4("color", &setLightColor.x);
 		ImGui::DragFloat("Intensity", &setIntensity_, 0.05f, 0.0f, 5.0f);
 
 		// ライト設定
 		Sphere::SetLightActive(0, enableLighting_);
 		Model::SetLightActive(0, enableLighting_);
+		Sphere::SetLightColor(0, setLightColor);
+		Model::SetLightColor(0, setLightColor);
 		Sphere::SetLightRotation(0, setRotation_);
 		Model::SetLightRotation(0, setRotation_);
 		Sphere::SetLightIntensity(0, setIntensity_);
